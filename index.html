@@ -25,8 +25,6 @@
             --print-gap: 4mm;
             --name-font: 1.4rem;
             --print-name-font: 12.5pt;
-            --print-img-height: 65%; /* 💡 인쇄 시 사진 자동 비율 변수 */
-            --print-name-height: 35%; /* 💡 인쇄 시 이름 자동 비율 변수 */
             --box-padding: 20px;
             --print-box-padding: 2mm;
             --pin-size: 38px;
@@ -85,6 +83,7 @@
         .custom-message-input { width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 15px; color: var(--text-main); font-family: inherit; font-size: 0.95rem; resize: none; height: 60px; line-height: 1.4; transition: border-color 0.3s; }
         .custom-message-input:focus { outline: none; border-color: #f43f5e; }
         
+        /* 커스텀 체크박스 */
         .checkbox-label { display: flex; align-items: center; gap: 12px; margin: 10px 0; cursor: pointer; background: rgba(0,0,0,0.15); padding: 12px 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); transition: all 0.2s; }
         .checkbox-label:hover { background: rgba(0,0,0,0.25); border-color: rgba(255,255,255,0.2); }
         
@@ -130,16 +129,16 @@
         .seat-box.is-avoiding { border-color: var(--avoid-color); border-style: dashed; }
         .seat-box.empty-seat { background: rgba(255,255,255,0.02); border: 2px dashed rgba(255,255,255,0.1); box-shadow: none; cursor: grab; flex-direction: column; justify-content: center; padding: 20px; }
         
-        .pair-label { position: absolute; bottom: 8px; left: 8px; background: var(--pair-color); color: #000; font-size: 0.75rem; padding: 3px 6px; border-radius: 6px; font-weight: 900; z-index: 5; box-shadow: 0 2px 4px rgba(0,0,0,0.3); pointer-events: none; }
-        .avoid-label { position: absolute; bottom: 8px; right: 8px; background: var(--avoid-color); color: #fff; font-size: 0.75rem; padding: 3px 6px; border-radius: 6px; font-weight: 900; z-index: 5; box-shadow: 0 2px 4px rgba(0,0,0,0.3); pointer-events: none; }
-
+        .badge-container { position: absolute; bottom: 8px; left: 8px; display: flex; gap: 4px; flex-wrap: wrap; z-index: 10; pointer-events: auto; max-width: 90%; }
+        .pair-label, .avoid-label { font-size: 0.75rem; padding: 3px 6px; border-radius: 6px; font-weight: 900; box-shadow: 0 2px 4px rgba(0,0,0,0.3); cursor: pointer; transition: transform 0.1s; }
+        .pair-label:hover, .avoid-label:hover { transform: scale(1.1); }
+        
         .student-img { width: 60%; height: 100%; min-height: 0; object-fit: cover; object-position: top center; background: #2d3748; pointer-events: none; align-self: flex-start; }
         
         .student-name { 
             width: 40%; height: 100%; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; 
             text-align: center; font-weight: 800; padding: 4px; box-sizing: border-box; pointer-events: none; 
-            font-size: var(--name-font);
-            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            font-size: min(var(--name-font), 1.8vw);
         }
         .seat-number, .seat-name { 
             display: block; width: 100%; max-width: 100%; 
@@ -148,6 +147,7 @@
         .seat-number { font-size: 0.7em; opacity: 0.85; margin-bottom: 2px; }
         .seat-name { font-size: 1em; }
         
+        /* 💡 [웹 화면] 사진 숨기기 텍스트 크기 최적화 */
         .seating-grid.hide-photos .student-img { display: none !important; }
         .seating-grid.hide-photos .seat-box { flex-direction: column; justify-content: center; align-items: center; padding: 15px; }
         .seating-grid.hide-photos .student-name { 
@@ -198,7 +198,7 @@
             body.fit-screen .message-display { font-size: min(1.1rem, 2vh); padding: 1vh 2vw; margin-top: 1vh; }
         }
 
-        /* 🖨️ [인쇄용 CSS] 절대 깨지지 않는 완벽 해결판 */
+        /* 🖨️ [인쇄용 CSS] 완벽 격리 해결판 - 사진 있을 때와 없을 때 완벽한 통제 */
         @media print {
             html, body { width: 100% !important; height: 100% !important; margin: 0 !important; padding: 0 !important; background: white !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; overflow: hidden !important; }
             .sidebar, #modal, .pin-btn-container, #emptyState, .credit-btn, #customToast, #countdownOverlay { display: none !important; }
@@ -219,7 +219,7 @@
             .seat-box.empty-seat { border: 1.5px dashed #ccc !important; }
             .empty-seat-text { display: none !important; }
             
-            /* 💡 [수정] 사진 포함 출력 시 공간 배분 (사진 크기를 남는 공간으로 자동 팽창) */
+            /* 사진 100% 유연 공간 확보 */
             .student-img { 
                 display: block !important; width: 100% !important; 
                 height: auto !important; flex-grow: 1 !important; flex-shrink: 1 !important;
@@ -255,7 +255,7 @@
                 text-overflow: ellipsis !important; 
             }
             
-            .pair-label, .avoid-label { display: none !important; }
+            .badge-container { display: none !important; }
         }
     </style>
     <style id="dynamicPrintStyle"> @media print { @page { size: A4 portrait; margin: 5mm; } } </style>
@@ -328,7 +328,7 @@
             </label>
 
             <div class="btn-row" style="margin-top: 10px;">
-                <button type="button" class="btn btn-sub" style="font-size: 0.9rem; padding: 10px;" onclick="resetPins()">모든 고정 해제</button>
+                <button type="button" class="btn btn-sub" style="font-size: 0.9rem; padding: 10px;" onclick="resetPins()">모든 설정 해제</button>
                 <button type="button" id="fitScreenBtn" class="btn btn-sub" style="font-size: 0.9rem; padding: 10px; border: 1px solid var(--primary); color: var(--primary); background: transparent;" onclick="toggleFitScreen()">🖥️ 꽉찬화면 실행</button>
             </div>
         </section>
@@ -362,7 +362,7 @@
             <ul>
                 <li><strong>[명단 준비]</strong> 엑셀 파일을 업로드하면 사진과 이름이 자동 분리되어 즉시 세팅됩니다.</li>
                 <li><strong>[짝배열 모드]</strong> 켜두면 항상 두 줄씩 띄어 앉는 좁은 통로를 생성합니다.</li>
-                <li><strong>[짝꿍 및 기피 설정]</strong> 설정 버튼을 켜고 적용할 두 명의 학생을 차례로 클릭하세요. 무작위 배치 시 규칙이 자동 반영됩니다.</li>
+                <li><strong>[짝꿍 및 기피 설정]</strong> 설정 버튼을 켜고 적용할 두 명의 학생을 차례로 클릭하세요. (뱃지를 클릭하면 취소됩니다.)</li>
                 <li><strong>[수동 변경 및 고정]</strong> 자리 우측 상단의 핀을 누르면 고정되며, 드래그 앤 드롭으로 자리를 언제든 교체할 수 있습니다.</li>
                 <li><strong>[이스터에그]</strong> 이 시스템에는 교사를 위한 유용한 기능이 숨겨져 있습니다. 궁금하시면 개발자에게 문의해 주세요.</li>
             </ul>
@@ -464,7 +464,12 @@
         let isAvoidMode = false;
         let selectedForPair = [];
         let selectedForAvoid = [];
+        
         let currentPairId = 1;
+        let currentAvoidId = 1;
+        
+        const pairColors = ['#fbbf24', '#a3e635', '#34d399', '#2dd4bf', '#60a5fa', '#818cf8', '#c084fc', '#f472b6', '#fb7185'];
+        const avoidColors = ['#ef4444', '#f97316', '#d946ef', '#8b5cf6', '#6366f1', '#14b8a6', '#10b981', '#84cc16', '#eab308'];
 
         const defaultAvatar = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjY2Ij48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjI2NiIgZmlsbD0iIzJkMzc0OCIvPjxjaXJjbGUgY3g9IjEwMCIgY3k9IjExMCIgcj0iNDUiIGZpbGw9IiM0YTU1NjgiLz48cGF0aCBkPSJNMzAgMjY2YzAtNDAgMzAtNzAgNzAtNzBoMGM0MCAwIDcwIDMwIDcwIDcwWiIgZmlsbD0iIzRhNTU2OCIvPjwvc3ZnPg==';
 
@@ -485,7 +490,6 @@
             root.style.setProperty('--grid-rows', currentRows);
             const total = currentCols * currentRows;
             
-            // 💡 1. 폰트 배율 인쇄/화면 분리 최적화 로직
             if (total > 36) {
                 root.style.setProperty('--gap-size', '8px');
                 root.style.setProperty('--name-font', isHide ? '1.5rem' : '0.85rem');
@@ -649,7 +653,7 @@
                         name = match[2];
                     }
 
-                    students.push({ name: name, number: number, imgSrc: imgBlobUrl, isPinned: false, pairId: null, avoidIds: [] });
+                    students.push({ name: name, number: number, imgSrc: imgBlobUrl, isPinned: false, pairId: null, avoidGroups: [] });
                 }
 
                 const opt = getOptimalGrid(students.length);
@@ -690,7 +694,7 @@
                     name = match[2];
                 }
                 
-                return { name: name, number: number, imgSrc: URL.createObjectURL(file), isPinned: false, pairId: null, avoidIds: [] };
+                return { name: name, number: number, imgSrc: URL.createObjectURL(file), isPinned: false, pairId: null, avoidGroups: [] };
             });
             
             const opt = getOptimalGrid(students.length);
@@ -717,7 +721,7 @@
         }
 
         function syncStudentsArray() {
-            students = seats.filter(s => s.type === 'student').map(s => ({ name: s.name, number: s.number, imgSrc: s.imgSrc, isPinned: s.isPinned, pairId: s.pairId, avoidIds: s.avoidIds || [] }));
+            students = seats.filter(s => s.type === 'student').map(s => ({ name: s.name, number: s.number, imgSrc: s.imgSrc, isPinned: s.isPinned, pairId: s.pairId, avoidGroups: s.avoidGroups || [] }));
             
             const excelTextEl = document.getElementById('excelUploadText');
             const photoTextEl = document.getElementById('photoUploadText');
@@ -748,6 +752,25 @@
                 }
             }
         }
+
+        // 💡 뱃지 클릭 시 취소 함수 (전역)
+        window.cancelPair = function(e, pId) {
+            e.stopPropagation();
+            seats.forEach(s => { if(s && s.pairId === pId) s.pairId = null; });
+            syncStudentsArray(); renderGrid(false);
+            showCustomToast("짝꿍 연결이 삭제되었습니다.");
+        };
+
+        window.cancelAvoid = function(e, gId) {
+            e.stopPropagation();
+            seats.forEach(s => { 
+                if(s && s.avoidGroups) {
+                    s.avoidGroups = s.avoidGroups.filter(id => id !== gId);
+                }
+            });
+            syncStudentsArray(); renderGrid(false);
+            showCustomToast("기피 설정이 삭제되었습니다.");
+        };
 
         function renderGrid(anim = false) {
             const grid = document.getElementById('seatGrid');
@@ -780,28 +803,16 @@
                             let s1 = seats[targetList[0]], s2 = seats[targetList[1]];
                             
                             if (isPairMode) {
-                                if (s1.pairId && s1.pairId === s2.pairId) {
-                                    s1.pairId = null; s2.pairId = null;
-                                    showCustomToast("짝꿍 관계가 해제되었습니다.");
-                                } else {
-                                    s1.pairId = currentPairId; s2.pairId = currentPairId++;
-                                    showCustomToast("🔗 짝꿍이 연결되었습니다!");
-                                }
+                                s1.pairId = currentPairId; s2.pairId = currentPairId++;
+                                showCustomToast("🔗 짝꿍이 연결되었습니다!");
                                 selectedForPair = [];
                             } else if (isAvoidMode) {
-                                let uid1 = getUid(s1), uid2 = getUid(s2);
-                                if (!s1.avoidIds) s1.avoidIds = [];
-                                if (!s2.avoidIds) s2.avoidIds = [];
-
-                                if (s1.avoidIds.includes(uid2)) {
-                                    s1.avoidIds = s1.avoidIds.filter(id => id !== uid2);
-                                    s2.avoidIds = s2.avoidIds.filter(id => id !== uid1);
-                                    showCustomToast("기피 관계가 해제되었습니다.");
-                                } else {
-                                    s1.avoidIds.push(uid2);
-                                    s2.avoidIds.push(uid1);
-                                    showCustomToast("⛔ 기피 관계가 설정되었습니다!");
-                                }
+                                let gId = currentAvoidId++;
+                                if (!s1.avoidGroups) s1.avoidGroups = [];
+                                if (!s2.avoidGroups) s2.avoidGroups = [];
+                                s1.avoidGroups.push(gId);
+                                s2.avoidGroups.push(gId);
+                                showCustomToast("⛔ 기피 관계가 설정되었습니다!");
                                 selectedForAvoid = [];
                             }
                         }
@@ -823,12 +834,21 @@
                         nameHtml = `<span class="seat-name">${seat.name}</span>`;
                     }
 
-                    let badges = '';
-                    if (seat.pairId) badges += `<div class="pair-label">🔗 짝꿍</div>`;
-                    if (seat.avoidIds && seat.avoidIds.length > 0) badges += `<div class="avoid-label">⛔ 기피</div>`;
+                    let badgesHtml = '<div class="badge-container">';
+                    if (seat.pairId) {
+                        let color = pairColors[seat.pairId % pairColors.length];
+                        badgesHtml += `<div class="pair-label" style="background-color: ${color};" onclick="cancelPair(event, ${seat.pairId})">🔗 짝꿍</div>`;
+                    }
+                    if (seat.avoidGroups && seat.avoidGroups.length > 0) {
+                        seat.avoidGroups.forEach(gId => {
+                            let color = avoidColors[gId % avoidColors.length];
+                            badgesHtml += `<div class="avoid-label" style="background-color: ${color};" onclick="cancelAvoid(event, ${gId})">⛔ 기피</div>`;
+                        });
+                    }
+                    badgesHtml += '</div>';
 
                     div.innerHTML = `<div class="pin-btn-container" onclick="togglePin(event, ${idx})"><span class="pin-icon">${seat.isPinned ? '📌' : '📍'}</span></div>
-                                     ${badges}
+                                     ${badgesHtml}
                                      <img class="student-img" src="${seat.imgSrc}"><div class="student-name">${nameHtml}</div>`;
                 } else {
                     div.classList.add('empty-seat');
@@ -899,7 +919,7 @@
                     }
                     
                     let imgSrc = seats[idx].imgSrc || defaultAvatar; 
-                    seats[idx] = { type: 'student', name: name, number: number, imgSrc: imgSrc, isPinned: seats[idx].isPinned || false, pairId: seats[idx].pairId || null, avoidIds: seats[idx].avoidIds || [] };
+                    seats[idx] = { type: 'student', name: name, number: number, imgSrc: imgSrc, isPinned: seats[idx].isPinned || false, pairId: seats[idx].pairId || null, avoidGroups: seats[idx].avoidGroups || [] };
                 }
                 syncStudentsArray();
                 renderGrid(false);
@@ -910,13 +930,28 @@
         }
 
         function togglePin(e, idx) { e.stopPropagation(); if (seats[idx].type === 'student') { seats[idx].isPinned = !seats[idx].isPinned; renderGrid(false); } }
-        function resetPins() { seats.forEach(s => {if(s.type==='student') s.isPinned = false;}); renderGrid(false); }
+        
+        // 💡 모든 설정 초기화 로직 (핀, 짝꿍, 기피, 전역 변수 모두 초기화)
+        function resetPins() { 
+            seats.forEach(s => {
+                if(s.type === 'student') {
+                    s.isPinned = false;
+                    s.pairId = null;
+                    s.avoidGroups = [];
+                }
+            }); 
+            selectedForPair = [];
+            selectedForAvoid = [];
+            syncStudentsArray();
+            renderGrid(false); 
+            showCustomToast("모든 설정(고정, 짝꿍, 기피)이 해제되었습니다.");
+        }
         
         function saveSecretPlan() {
             if (seats.length === 0) return;
             const secretPlanNames = seats.map(s => s.type === 'student' ? (s.number ? `${s.number}_${s.name}` : s.name) : "X");
             localStorage.setItem('secretSeatingPlan', JSON.stringify(secretPlanNames));
-            showCustomToast("스마트 좌석 배치 시스템 v14.0 (모든 에러 박멸)\n선생님, 정말 고생 많으셨습니다! ✨");
+            showCustomToast("스마트 좌석 배치 시스템 v16.0 (모든 초기화 지원)\n선생님, 정말 고생 많으셨습니다! ✨");
         }
 
         function triggerAnimation(element) {
@@ -1081,13 +1116,16 @@
                         if (!pairMap[s.pairId]) pairMap[s.pairId] = [];
                         pairMap[s.pairId].push(i);
                     }
-                    if (s.avoidIds && s.avoidIds.length > 0) {
+                    if (s.avoidGroups && s.avoidGroups.length > 0) {
                         let r1 = Math.floor(i / currentCols), c1 = i % currentCols;
                         tempSeats.forEach((s2, j) => {
-                            if (i !== j && s2 && s2.type === 'student') {
-                                let r2 = Math.floor(j / currentCols), c2 = j % currentCols;
-                                if (Math.abs(r1 - r2) <= 1 && Math.abs(c1 - c2) <= 1) {
-                                    if (s.avoidIds.includes(getUid(s2))) penalty += 50; 
+                            if (i !== j && s2 && s2.type === 'student' && s2.avoidGroups) {
+                                let hasSharedAvoid = s.avoidGroups.some(g => s2.avoidGroups.includes(g));
+                                if (hasSharedAvoid) {
+                                    let r2 = Math.floor(j / currentCols), c2 = j % currentCols;
+                                    if (Math.abs(r1 - r2) <= 1 && Math.abs(c1 - c2) <= 1) {
+                                        penalty += 50; 
+                                    }
                                 }
                             }
                         });
@@ -1123,7 +1161,7 @@
             const fileName = classInfo ? `${classInfo}_좌석백업.json` : "좌석배치백업.json";
             
             const planData = seats.map(s => s.type === 'student' ? {
-                id: getUid(s), pairId: s.pairId || null, avoidIds: s.avoidIds || []
+                id: getUid(s), pairId: s.pairId || null, avoidGroups: s.avoidGroups || []
             } : "X");
             const payload = { c: currentCols, r: currentRows, p: planData };
             
@@ -1154,15 +1192,15 @@
                         if (item === "X") return { type: 'empty' };
                         let nameRaw = typeof item === 'string' ? item : item.id;
                         let pId = typeof item === 'object' ? item.pairId : null;
-                        let aIds = typeof item === 'object' ? (item.avoidIds || []) : [];
+                        let aGroups = typeof item === 'object' ? (item.avoidGroups || []) : [];
                         
                         let number = '', name = nameRaw;
                         const match = nameRaw.match(/^(\d+)[_.\-\s]*(.+)$/);
                         if (match) { number = match[1]; name = match[2]; }
 
                         const foundStudent = students.find(st => st.name === name && st.number === number) || students.find(st => st.name === nameRaw);
-                        return foundStudent ? { type: 'student', ...foundStudent, isPinned: false, pairId: pId, avoidIds: aIds } 
-                                            : { type: 'student', name: name, number: number, imgSrc: defaultAvatar, isPinned: false, pairId: pId, avoidIds: aIds };
+                        return foundStudent ? { type: 'student', ...foundStudent, isPinned: false, pairId: pId, avoidGroups: aGroups } 
+                                            : { type: 'student', name: name, number: number, imgSrc: defaultAvatar, isPinned: false, pairId: pId, avoidGroups: aGroups };
                     });
                     
                     syncStudentsArray(); renderGrid(true); showCustomToast("백업 배치를 성공적으로 불러왔습니다!");
