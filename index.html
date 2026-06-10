@@ -239,12 +239,10 @@
             .seating-grid.hide-photos .student-img { display: none !important; }
             .seating-grid.hide-photos .student-name { 
                 height: 100% !important; flex-basis: 100% !important;
-                /* 💡 이중 증폭 완벽 제거: JS에서 계산해준 var(--print-name-font) 자체를 그대로 사용 */
                 font-size: var(--print-name-font) !important; 
                 gap: 2mm !important;
             }
             .seating-grid.hide-photos .seat-number { 
-                /* 💡 이름 대비 55% 크기로 맞춰 밸런스 유지 */
                 font-size: 0.55em !important; 
                 margin-bottom: 0 !important; 
             }
@@ -753,7 +751,6 @@
             }
         }
 
-        // 💡 뱃지 클릭 시 취소 함수 (전역)
         window.cancelPair = function(e, pId) {
             e.stopPropagation();
             seats.forEach(s => { if(s && s.pairId === pId) s.pairId = null; });
@@ -802,17 +799,57 @@
                         if (targetList.length === 2) {
                             let s1 = seats[targetList[0]], s2 = seats[targetList[1]];
                             
+                            // 💡 1. 짝꿍/기피 충돌 해결을 위한 현재 상태 확인
+                            let isAlreadyPair = s1.pairId && (s1.pairId === s2.pairId);
+                            let sharedAvoidGroups = [];
+                            if (s1.avoidGroups && s2.avoidGroups) {
+                                sharedAvoidGroups = s1.avoidGroups.filter(g => s2.avoidGroups.includes(g));
+                            }
+                            
                             if (isPairMode) {
-                                s1.pairId = currentPairId; s2.pairId = currentPairId++;
-                                showCustomToast("🔗 짝꿍이 연결되었습니다!");
+                                if (isAlreadyPair) {
+                                    s1.pairId = null; s2.pairId = null;
+                                    showCustomToast("짝꿍 관계가 해제되었습니다.");
+                                } else {
+                                    if (sharedAvoidGroups.length > 0) {
+                                        // 💡 기피 관계 지우고 짝꿍으로 덮어쓰기
+                                        sharedAvoidGroups.forEach(gId => {
+                                            seats.forEach(s => { if (s && s.avoidGroups) s.avoidGroups = s.avoidGroups.filter(id => id !== gId); });
+                                        });
+                                        s1.pairId = currentPairId; s2.pairId = currentPairId++;
+                                        showCustomToast("기존 기피 설정이 취소되고 🔗짝꿍으로 덮어씌워졌습니다!");
+                                    } else {
+                                        s1.pairId = currentPairId; s2.pairId = currentPairId++;
+                                        showCustomToast("🔗 짝꿍이 연결되었습니다!");
+                                    }
+                                }
                                 selectedForPair = [];
                             } else if (isAvoidMode) {
-                                let gId = currentAvoidId++;
-                                if (!s1.avoidGroups) s1.avoidGroups = [];
-                                if (!s2.avoidGroups) s2.avoidGroups = [];
-                                s1.avoidGroups.push(gId);
-                                s2.avoidGroups.push(gId);
-                                showCustomToast("⛔ 기피 관계가 설정되었습니다!");
+                                if (sharedAvoidGroups.length > 0) {
+                                    // 이미 기피일 경우 해제
+                                    sharedAvoidGroups.forEach(gId => {
+                                        seats.forEach(s => { if (s && s.avoidGroups) s.avoidGroups = s.avoidGroups.filter(id => id !== gId); });
+                                    });
+                                    showCustomToast("기피 관계가 해제되었습니다.");
+                                } else {
+                                    let gId = currentAvoidId++;
+                                    if (!s1.avoidGroups) s1.avoidGroups = [];
+                                    if (!s2.avoidGroups) s2.avoidGroups = [];
+                                    
+                                    if (isAlreadyPair) {
+                                        // 💡 짝꿍 관계 지우고 기피로 덮어쓰기
+                                        let pIdToRemove = s1.pairId;
+                                        seats.forEach(s => { if (s && s.pairId === pIdToRemove) s.pairId = null; });
+                                        
+                                        s1.avoidGroups.push(gId);
+                                        s2.avoidGroups.push(gId);
+                                        showCustomToast("기존 짝꿍 설정이 취소되고 ⛔기피 관계로 덮어씌워졌습니다!");
+                                    } else {
+                                        s1.avoidGroups.push(gId);
+                                        s2.avoidGroups.push(gId);
+                                        showCustomToast("⛔ 기피 관계가 설정되었습니다!");
+                                    }
+                                }
                                 selectedForAvoid = [];
                             }
                         }
@@ -931,7 +968,6 @@
 
         function togglePin(e, idx) { e.stopPropagation(); if (seats[idx].type === 'student') { seats[idx].isPinned = !seats[idx].isPinned; renderGrid(false); } }
         
-        // 💡 모든 설정 초기화 로직 (핀, 짝꿍, 기피, 전역 변수 모두 초기화)
         function resetPins() { 
             seats.forEach(s => {
                 if(s.type === 'student') {
@@ -951,7 +987,7 @@
             if (seats.length === 0) return;
             const secretPlanNames = seats.map(s => s.type === 'student' ? (s.number ? `${s.number}_${s.name}` : s.name) : "X");
             localStorage.setItem('secretSeatingPlan', JSON.stringify(secretPlanNames));
-            showCustomToast("스마트 좌석 배치 시스템 v16.0 (모든 초기화 지원)\n선생님, 정말 고생 많으셨습니다! ✨");
+            showCustomToast("스마트 좌석 배치 시스템 v16.1 (논리 충돌 완벽 해결)\n선생님, 정말 고생 많으셨습니다! ✨");
         }
 
         function triggerAnimation(element) {
