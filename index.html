@@ -39,7 +39,7 @@
 
         body { font-family: 'Pretendard', 'Malgun Gothic', sans-serif; margin: 0; display: flex; flex-direction: row-reverse; height: 100vh; background-color: var(--bg-dark); color: var(--text-main); overflow: hidden; user-select: none; }
         
-        .sidebar { width: var(--sidebar-width); background: var(--card-bg); padding: 25px; border-left: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; gap: 15px; overflow-y: auto; box-shadow: -5px 0 15px rgba(0,0,0,0.3); z-index: 100; flex-shrink: 0; box-sizing: border-box; }
+        .sidebar { width: var(--sidebar-width); background: var(--card-bg); padding: 25px; border-left: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; overflow-y: auto; box-shadow: -5px 0 15px rgba(0,0,0,0.3); z-index: 100; flex-shrink: 0; box-sizing: border-box; }
         body.intro-mode .sidebar { margin-right: calc(-1 * var(--sidebar-width)); transform: translateX(100%); opacity: 0; pointer-events: none; }
         
         .welcome-character { max-width: 450px; height: auto; border-radius: 20px; filter: drop-shadow(0 0 40px rgba(34, 211, 238, 0.25)) drop-shadow(0 15px 25px rgba(0,0,0,0.6)); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.4s ease; }
@@ -62,9 +62,8 @@
         .btn-accent { background: var(--primary); color: var(--bg-dark); }
         .btn-accent:hover { background: #a5f3fc; }
 
-        .highlight-section { padding: 22px; border-radius: 16px; margin: 4px 0; background: linear-gradient(145deg, var(--section-bg), rgba(255,255,255,0.02)); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
-        
-        /* 메뉴 일관성을 위한 디자인 통일 */
+        /* 모든 섹션의 일관성 부여 (여백 통일) */
+        .highlight-section { padding: 22px; border-radius: 16px; margin: 6px 0; background: linear-gradient(145deg, var(--section-bg), rgba(255,255,255,0.02)); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.15); }
         .step1 { background: linear-gradient(145deg, var(--section-bg), rgba(139, 92, 246, 0.12)); border-color: rgba(139, 92, 246, 0.35); }
         .step2 { background: linear-gradient(145deg, var(--section-bg), rgba(16, 185, 129, 0.12)); border-color: rgba(16, 185, 129, 0.35); }
         .step3 { background: linear-gradient(145deg, var(--section-bg), rgba(34, 211, 238, 0.12)); border-color: rgba(34, 211, 238, 0.35); }
@@ -103,14 +102,13 @@
         #hidePhotoCheck:checked { background-color: var(--pinned-color); border-color: var(--pinned-color); box-shadow: 0 0 10px rgba(244, 63, 94, 0.4); }
         #hidePhotoCheck:checked::after { border-color: #fff; }
         
-        /* 팁 컨텐츠 텍스트 디자인 수정 */
         .usage-tips ul { list-style: none; padding: 0; margin: 0; word-break: keep-all; font-size: 0.85rem; color: #cbd5e1; line-height: 1.6; }
         .usage-tips li { margin-bottom: 10px; padding-left: 16px; position: relative; }
         .usage-tips li:last-child { margin-bottom: 0; }
         .usage-tips li::before { content: "▪"; position: absolute; left: 0; top: 1px; color: #3b82f6; font-size: 0.8rem; }
         .usage-tips li strong { color: #f1f5f9; font-weight: 700; }
         
-        .credit-btn { background: transparent; border: none; color: rgba(255, 255, 255, 0.3); font-size: 0.85rem; text-align: left; width: 100%; padding: 5px 10px; margin-top: auto; cursor: pointer; transition: color 0.3s; font-family: inherit; letter-spacing: 1px; box-sizing: border-box; font-weight: 500; }
+        .credit-btn { background: transparent; border: none; color: rgba(255, 255, 255, 0.3); font-size: 0.85rem; text-align: left; width: 100%; padding: 5px 10px; margin-top: auto; padding-top: 15px; cursor: pointer; transition: color 0.3s; font-family: inherit; letter-spacing: 1px; box-sizing: border-box; font-weight: 500; }
         .credit-btn:hover { color: var(--primary); }
 
         .main-content { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
@@ -124,7 +122,7 @@
         .welcome-text { margin-top: 30px; font-size: 1.2rem; color: var(--text-dim); text-align: center; line-height: 1.6; letter-spacing: 1px; font-weight: 600; }
         .welcome-text span { color: var(--primary); font-weight: 800; }
         
-        /* 💡 래퍼를 활용한 정밀한 통로 아이콘 매핑 */
+        /* 💡 통로 아이콘과 좌석 격자를 하나로 묶는 래퍼 */
         #seatGridWrapper { position: relative; width: 100%; flex-grow: 1; display: flex; flex-direction: column; }
         
         .seating-grid { display: grid; grid-template-columns: var(--grid-template, repeat(var(--grid-cols), 1fr)); grid-template-rows: repeat(var(--grid-rows), minmax(0, 1fr)); gap: var(--gap-size); width: 100%; flex-grow: 1; align-content: stretch; position: relative; z-index: 1; }
@@ -147,16 +145,15 @@
         .btn-include { display: inline-block; margin-top: 8px; padding: 6px 10px; background: rgba(16, 185, 129, 0.15); color: #6ee7b7; border-radius: 6px; font-size: 0.8rem; cursor: pointer; transition: 0.2s; font-weight: 700; border: 1px solid rgba(16, 185, 129, 0.3); }
         .btn-include:hover { background: rgba(16, 185, 129, 0.4); color: #fff; }
 
-        /* 💡 수정된 통로 제어 아이콘 영역 - Grid 구조 위에 완벽하게 매핑됨 */
+        /* 💡 수학적으로 완벽하게 정렬된 통로 제어 아이콘 영역 */
         #gridColumnToggles {
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 0; /* 시각적인 공간은 차지하지 않음 */
-            display: grid; 
-            pointer-events: none; /* 아이콘 영역 클릭 시 뒤쪽 Grid 무시되는 현상 방지 */
-            z-index: 50; 
+            width: 100%;
+            height: 32px; /* 아이콘 높이만큼의 공간 확보 */
+            display: grid;
+            pointer-events: none; /* 아이콘을 제외한 빈 공간 클릭 무시 */
+            z-index: 50;
+            position: relative;
+            margin-bottom: 12px; /* 아이콘과 좌석 사이의 간격 */
         }
         
         .aisle-toggle {
@@ -172,21 +169,18 @@
             font-size: 0.85rem;
             font-weight: 900;
             cursor: pointer;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
             letter-spacing: -1.5px;
             user-select: none;
             pointer-events: auto; /* 아이콘 자체는 다시 클릭 가능하도록 설정 */
-            
-            /* 버튼을 부모 높이 0px 기준 위로 절반 올려서 격자 선에 맞춤 */
-            margin-top: -16px; 
         }
         .aisle-toggle.is-active {
             background: var(--primary);
             color: var(--bg-dark);
         }
         .aisle-toggle:hover {
-            transform: scale(1.15) !important; /* Wrapper의 transform 무시 */
+            scale: 1.15; /* 레이아웃을 망가뜨리지 않는 안전한 확대 애니메이션 */
             box-shadow: 0 6px 15px rgba(34, 211, 238, 0.4);
         }
         @media print { #gridColumnToggles { display: none !important; } }
@@ -430,14 +424,14 @@
             </div>
         </section>
 
-        <section class="highlight-section step-tips accordion-section closed" style="margin-bottom: auto;">
+        <section class="highlight-section step-tips accordion-section closed">
             <div class="accordion-header" onclick="toggleAccordion(this)">
                 <h2 style="margin: 0; color: #3b82f6; font-size: 1.15rem; border-left: 4px solid #3b82f6; padding-left: 10px;">사용 안내 및 팁</h2>
                 <span class="accordion-icon" style="color: #3b82f6;">▼</span>
             </div>
             <div class="accordion-content usage-tips" style="display: none; margin-top: 15px;">
                 <ul>
-                    <li><strong>[초간편 통로 제어]</strong> 생성된 격자의 윗부분에 띄워진 <strong><> (띄우기), >< (붙이기) 아이콘</strong>을 클릭하여 내 교실에 딱 맞는 통로를 마음대로 구성해 보세요.</li>
+                    <li><strong>[초간편 통로 제어]</strong> 자리가 생성되면 맨 윗줄의 <strong>두 학생 사이 빈 공간 중앙에 위치한 <> (띄우기), >< (붙이기) 아이콘</strong>을 클릭하여 내 교실에 딱 맞는 통로를 마음대로 구성해 보세요.</li>
                     <li><strong>[빈자리 고정]</strong> 생성된 빈자리를 클릭하여 '배정 제외' 처리하면, 무작위 배치 시 해당 자리에는 학생이 배치되지 않습니다.</li>
                     <li><strong>[명단 준비]</strong> 엑셀 파일을 업로드하면 사진과 이름이 자동 분리되어 즉시 세팅됩니다.</li>
                     <li><strong>[짝꿍 및 기피 설정]</strong> 설정 버튼을 켜고 적용할 두 명의 학생을 차례로 클릭하세요. 직접 띄워둔 통로를 건너뛰며 억지로 짝꿍이 맺어지지 않도록 최적화되어 있습니다.</li>
@@ -913,53 +907,58 @@
             }
         };
 
-        // 💡 CSS Grid 시스템 구조를 완벽하게 복제하여 아이콘을 두 열 사이 중앙에 배치
+        // 💡 수학적으로 완벽하게 매핑된 통로 제어 아이콘 렌더링 함수
         function renderColumnToggles() {
             const toggleContainer = document.getElementById('gridColumnToggles');
             toggleContainer.innerHTML = '';
             
-            // #seatGrid와 동일한 gap 적용
-            const root = document.documentElement;
-            toggleContainer.style.gap = root.style.getPropertyValue('--gap-size') || '25px';
-            
-            let tracks = [];
-            for (let i = 0; i < currentCols; i++) {
-                tracks.push('1fr');
-                if (i < currentCols - 1 && activeAisles[i]) {
-                    tracks.push('0.15fr');
-                }
+            if (seats.length === 0) {
+                toggleContainer.style.display = 'none';
+                return;
             }
-            toggleContainer.style.gridTemplateColumns = tracks.join(' ');
+            toggleContainer.style.display = 'grid';
 
-            let currentTrack = 1; // 1-based index for grid-column
+            const root = document.documentElement;
+            // 부모 그리드(좌석 격자)의 간격과 열 구조를 완벽하게 복사
+            toggleContainer.style.gap = root.style.getPropertyValue('--gap-size') || '25px';
+            toggleContainer.style.gridTemplateColumns = root.style.getPropertyValue('--grid-template');
+
+            let currentTrack = 1;
             for (let i = 0; i < currentCols - 1; i++) {
                 const wrapper = document.createElement('div');
-                wrapper.style.height = '0';
+                wrapper.style.height = '32px';
+                wrapper.style.position = 'relative'; // 절대 배치되는 아이콘의 닻 역할
                 wrapper.style.display = 'flex';
                 
                 const hasAisle = activeAisles[i];
-                if (hasAisle) {
-                    wrapper.style.gridColumn = currentTrack + 1; // 0.15fr 통로 트랙에 쏙 집어넣음
-                    wrapper.style.justifyContent = 'center';     // 정중앙 정렬
-                    currentTrack += 2;
-                } else {
-                    wrapper.style.gridColumn = currentTrack;     // 왼쪽 학생 트랙에 넣음
-                    wrapper.style.justifyContent = 'flex-end';   // 오른쪽 끝에 붙임
-                    wrapper.style.marginRight = 'calc(var(--gap-size) / -2)'; // 간격 절반만큼 당겨와서 완벽히 선 위 중앙에 안착
-                    wrapper.style.transform = 'translateX(50%)'; 
-                    currentTrack += 1;
-                }
-
                 const toggleBtn = document.createElement('div');
                 toggleBtn.className = 'aisle-toggle' + (hasAisle ? ' is-active' : '');
                 toggleBtn.innerHTML = hasAisle ? '><' : '<>';
                 toggleBtn.title = hasAisle ? '간격 붙이기' : '간격 띄우기';
                 
+                if (hasAisle) {
+                    // 통로가 이미 벌어진 경우: 0.15fr 통로 트랙 중앙에 배치
+                    wrapper.style.gridColumn = currentTrack + 1;
+                    wrapper.style.justifyContent = 'center';
+                    wrapper.style.alignItems = 'center';
+                    currentTrack += 2; // 다음 좌석 트랙으로 이동
+                } else {
+                    // 통로가 안 벌어진 경우: 왼쪽 좌석 트랙을 사용하여 간격 사이로 아이콘 밀어넣기
+                    wrapper.style.gridColumn = currentTrack;
+                    currentTrack += 1;
+                    
+                    // 아이콘을 왼쪽 트랙의 맨 오른쪽 끝에 배치하고, 간격(Gap)의 절반만큼 바깥쪽(오른쪽)으로 당겨서 완벽한 중앙에 안착시킵니다.
+                    toggleBtn.style.position = 'absolute';
+                    toggleBtn.style.right = '0';
+                    toggleBtn.style.top = '0';
+                    toggleBtn.style.transform = 'translateX(calc(50% + var(--gap-size) / 2))';
+                }
+
                 toggleBtn.onclick = (e) => {
                     e.stopPropagation();
                     toggleAisle(i);
                 };
-                toggleBtn.onmousedown = (e) => e.stopPropagation();
+                toggleBtn.onmousedown = (e) => e.stopPropagation(); // 드래그 간섭 방지
                 
                 wrapper.appendChild(toggleBtn);
                 toggleContainer.appendChild(wrapper);
@@ -1108,6 +1107,9 @@
                 grid.appendChild(div);
             });
             
+            // 격자 렌더링 시 통로 제어 아이콘도 동기화
+            renderColumnToggles();
+
             if (anim) {
                 const skipAnim = document.getElementById('skipAnimCheck') ? document.getElementById('skipAnimCheck').checked : false;
                 const delayMs = skipAnim ? 15 : 250;
@@ -1191,7 +1193,7 @@
                 return "X";
             });
             localStorage.setItem('secretSeatingPlan', JSON.stringify(secretPlanNames));
-            showCustomToast("스마트 좌석 배치 시스템 v16.8 (통로 아이콘 완벽 매핑)\n선생님, 정말 고생 많으셨습니다! ✨");
+            showCustomToast("스마트 좌석 배치 시스템 v16.9 (통로 아이콘 완벽 매핑)\n선생님, 정말 고생 많으셨습니다! ✨");
         }
 
         function triggerAnimation(element) {
