@@ -141,11 +141,26 @@
         .btn-include { display: inline-block; margin-top: 8px; padding: 6px 10px; background: rgba(16, 185, 129, 0.15); color: #6ee7b7; border-radius: 6px; font-size: 0.8rem; cursor: pointer; transition: 0.2s; font-weight: 700; border: 1px solid rgba(16, 185, 129, 0.3); }
         .btn-include:hover { background: rgba(16, 185, 129, 0.4); color: #fff; }
 
-        /* 💡 통로 뗐다 붙였다 하는 버튼 (Interactive Aisle Toggle) CSS */
+        /* 💡 새로운 통로 제어 아이콘 영역 (Interactive Aisle Toggle Area) CSS */
+        #gridColumnToggles {
+            width: calc(100% - 60px); /* #captureArea padding 보정 */
+            display: grid; 
+            gap: var(--gap-size);
+            position: absolute; 
+            top: calc(30px + 60px + 25px); /* #captureArea padding + #mainTitle height + podium margin 보정 */
+            left: 30px; /* #captureArea padding 보정 */
+            pointer-events: none; /* 아이콘 자체에만 반응하게 설정 */
+            z-index: 50; 
+            display: none; /* 기본 숨김 */
+        }
+        
+        #seatGrid:has(.seat-box) ~ #gridColumnToggles { display: grid; } /* 격자에 자리가 있을 때만 표시 */
+        
         .aisle-toggle {
             position: absolute;
-            top: -16px;
-            right: -24px;
+            top: 0; 
+            right: 0; /* colIndex + aislesBefore 비율 계산 후Javascript로 동적 제어 */
+            transform: translate(50%, -50%); /* 아이콘 자체 중앙 배치 */
             width: 32px;
             height: 32px;
             background: var(--card-bg);
@@ -158,19 +173,18 @@
             font-size: 0.85rem;
             font-weight: 900;
             cursor: pointer;
-            z-index: 50;
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
             letter-spacing: -1.5px;
             user-select: none;
+            pointer-events: auto; /* 아이콘은 클릭 가능 */
         }
         .aisle-toggle.is-active {
             background: var(--primary);
             color: var(--bg-dark);
-            right: -32px;
         }
         .aisle-toggle:hover {
-            transform: scale(1.15);
+            transform: translate(50%, -50%) scale(1.15);
             box-shadow: 0 6px 15px rgba(34, 211, 238, 0.4);
         }
         @media print { .aisle-toggle { display: none !important; } }
@@ -216,7 +230,7 @@
         .seat-box.hidden-state { opacity: 0; transform: scale(0.4) translateY(60px); filter: blur(8px); }
         
         #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(5px); }
-        .modal-body { background: var(--card-bg); padding: 40px; border-radius: 16px; width: 360px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .modal-body { background: var(--card-bg); padding: 40px; border-radius: 166px; width: 360px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
         .modal-body h3 { font-size: 1.4rem; }
         
         #customToast { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--card-bg); color: var(--primary); padding: 18px 40px; border-radius: 30px; border: 1px solid rgba(34, 211, 238, 0.3); box-shadow: 0 15px 30px rgba(0,0,0,0.6); font-size: 1.2rem; font-weight: 700; opacity: 0; transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease; z-index: 3000; pointer-events: none; letter-spacing: 1px; text-align: center; white-space: pre-line; }
@@ -247,7 +261,7 @@
         /* 🖨️ [인쇄용 CSS] 완벽 격리 해결판 */
         @media print {
             html, body { width: 100% !important; height: 100% !important; margin: 0 !important; padding: 0 !important; background: white !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; overflow: hidden !important; }
-            .sidebar, #modal, .pin-btn-container, #emptyState, .credit-btn, #customToast, #countdownOverlay, .btn-exclude, .btn-include { display: none !important; }
+            .sidebar, #modal, .pin-btn-container, #emptyState, .credit-btn, #customToast, #countdownOverlay, .btn-exclude, .btn-include, #gridColumnToggles { display: none !important; }
             .main-content { padding: 0 !important; display: flex !important; width: 100% !important; height: 100% !important; overflow: hidden !important; }
             #captureArea { width: 100% !important; height: 100% !important; max-width: none !important; padding: 4mm !important; background: white !important; box-sizing: border-box !important; display: flex !important; flex-direction: column !important; }
             .header-group { flex-shrink: 0 !important; margin-bottom: 1mm !important; }
@@ -309,7 +323,7 @@
 
         <section class="highlight-section step1 accordion-section closed">
             <div class="accordion-header" onclick="toggleAccordion(this)">
-                <h2 style="margin: 0; color: #8b5cf6; font-size: 1.15rem; border-left: 4px solid #8b5cf6; padding-left: 10px;">[STEP 1] 기본 설정 <span style="font-size: 0.75rem; color: var(--text-dim); font-weight: normal; margin-left: 6px;">(부가 설정)</span></h2>
+                <h2 style="margin: 0; color: #8b5cf6; font-size: 1.15rem; border-left: 4px solid #8b5cf6; padding-left: 10px;">[STEP 1] 기본 설정 (부가 설정)</h2>
                 <span class="accordion-icon" style="color: #8b5cf6;">▼</span>
             </div>
             
@@ -325,18 +339,10 @@
                         <input type="number" id="colInput" class="custom-input" min="2" max="10" placeholder="가로칸" title="가로 줄 수">
                         <input type="number" id="rowInput" class="custom-input" min="2" max="10" placeholder="세로칸" title="세로 줄 수">
                     </div>
-                    <button type="button" class="btn btn-sub" style="width:100%; padding: 10px; margin-top: 5px;" onclick="applyLayoutSettings()">격자 적용 / 초기화</button>
+                    <button type="button" class="btn btn-sub" style="width:100%; padding: 10px; margin-top: 5px;" onclick="applyLayoutSettings()">적용 / 초기화</button>
                 </div>
 
-                <div style="margin-top: 15px;">
-                    <div style="font-size: 0.95rem; font-weight: bold; margin-bottom: 8px; color: var(--text-main);">통로(띄어 앉기) 설정 <span style="font-size: 0.75rem; color: var(--text-dim); font-weight: normal; margin-left: 6px;">(적용 후 아이콘으로 수정 가능)</span></div>
-                    <select id="layoutTypeSelect" class="custom-input" onchange="applyLayoutType()" style="cursor: pointer; padding: 10px 15px; font-weight: 600;">
-                        <option value="default">기본 (모두 붙어 앉기)</option>
-                        <option value="pair">짝배열 (2명씩 띄어 앉기)</option>
-                        <option value="1N1">1-N-1 배열 (양끝 혼자, 가운데 짝꿍)</option>
-                    </select>
                 </div>
-            </div>
         </section>
 
         <section class="highlight-section step2 accordion-section closed">
@@ -371,16 +377,16 @@
             </div>
             
             <div class="accordion-content" style="display: none; margin-top: 15px;">
-                <button type="button" class="btn btn-shuffle" style="margin-bottom: 12px; padding: 16px; font-size: 1.1rem;" onclick="startCountdownAndShuffle(event)">🎲 무작위 배치 시작</button>
+                <button type="button" class="btn btn-shuffle" style="margin-bottom: 12px; padding: 16px; font-size: 1.1rem;" onclick="startCountdownAndShuffle(event)">무작위 배치 시작</button>
 
                 <div class="btn-row" style="margin-bottom: 12px;">
-                    <button type="button" id="pairModeBtn" class="btn btn-sub" style="font-size: 0.85rem; padding: 12px; border: 1px solid var(--pair-color); color: var(--pair-color); background: transparent;" onclick="togglePairMode()">🔗 짝꿍 설정 (OFF)</button>
-                    <button type="button" id="avoidModeBtn" class="btn btn-sub" style="font-size: 0.85rem; padding: 12px; border: 1px solid var(--avoid-color); color: var(--avoid-color); background: transparent;" onclick="toggleAvoidMode()">⛔ 기피 설정 (OFF)</button>
+                    <button type="button" id="pairModeBtn" class="btn btn-sub" style="font-size: 0.85rem; padding: 12px; border: 1px solid var(--pair-color); color: var(--pair-color); background: transparent;" onclick="togglePairMode()">짝꿍 설정 (OFF)</button>
+                    <button type="button" id="avoidModeBtn" class="btn btn-sub" style="font-size: 0.85rem; padding: 12px; border: 1px solid var(--avoid-color); color: var(--avoid-color); background: transparent;" onclick="toggleAvoidMode()">기피 설정 (OFF)</button>
                 </div>
 
                 <div class="btn-row" style="margin-bottom: 12px;">
                     <button type="button" class="btn btn-sub" style="font-size: 0.85rem; padding: 12px;" onclick="resetPins()">모든 설정 해제</button>
-                    <button type="button" id="fitScreenBtn" class="btn btn-sub" style="font-size: 0.85rem; padding: 12px; background: transparent; color: var(--primary); border: 1px solid var(--primary);" onclick="toggleFitScreen()">🖥️ 꽉찬화면 실행</button>
+                    <button type="button" id="fitScreenBtn" class="btn btn-sub" style="font-size: 0.85rem; padding: 12px; background: transparent; color: var(--primary); border: 1px solid var(--primary);" onclick="toggleFitScreen()">꽉찬화면 실행</button>
                 </div>
 
                 <label class="checkbox-label" style="margin: 0; background: rgba(0,0,0,0.25); border-radius: 8px; padding: 14px 15px;">
@@ -404,8 +410,8 @@
                 </label>
 
                 <div class="btn-row" style="margin-top: 15px;">
-                    <button type="button" class="btn-step4" onclick="openModal('student')">🖨️ 학생용 출력</button>
-                    <button type="button" class="btn-step4" style="background: linear-gradient(135deg, #be123c, #9f1239);" onclick="openModal('teacher')">🖨️ 교사용 출력</button>
+                    <button type="button" class="btn-step4" onclick="openModal('student')">학생용 출력</button>
+                    <button type="button" class="btn-step4" style="background: linear-gradient(135deg, #be123c, #9f1239);" onclick="openModal('teacher')">교사용 출력</button>
                 </div>
             </div>
         </section>
@@ -431,10 +437,11 @@
             </div>
             <div class="accordion-content" style="display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);">
                 <ul>
-                    <li><strong>[초간편 통로 제어]</strong> 생성된 좌석 맨 윗줄의 우측 상단 <strong><span style="color:var(--primary);"><></span> (띄우기), <span style="color:var(--primary);">><</span> (붙이기) 아이콘</strong>을 클릭하여 내 교실에 딱 맞는 통로를 마음대로 구성해 보세요!</li>
+                    <li><strong>[초간편 통로 제어]</strong> 생성된 좌석 맨 윗줄의 <strong>열 사이 중앙에 위치한 <> (띄우기), >< (붙이기) 아이콘</strong>을 클릭하여 내 교실에 딱 맞는 통로를 마음대로 구성해 보세요!</li>
                     <li><strong>[빈자리 고정]</strong> 생성된 빈자리를 클릭하여 '배정 제외' 처리하면, 무작위 배치 시 해당 자리에는 학생이 배치되지 않습니다.</li>
-                    <li><strong>[1-N-1 배열]</strong> 기본 설정에서 1-N-1 대형을 선택하면, 양쪽 끝은 혼자 앉고 가운데 학생들은 둘씩 짝지어 앉게 됩니다. (홀수 줄인 7줄이면 1-2-1-2-1이 기본 설정됩니다.)</li>
+                    <li><strong>[명단 준비]</strong> 엑셀 파일을 업로드하면 사진과 이름이 자동 분리되어 즉시 세팅됩니다.</li>
                     <li><strong>[짝꿍 및 기피 설정]</strong> 설정 버튼을 켜고 적용할 두 명의 학생을 차례로 클릭하세요. 직접 띄워둔 통로를 건너뛰며 억지로 짝꿍이 맺어지지 않도록 최적화되어 있습니다.</li>
+                    <li><strong>[수동 변경 및 고정]</strong> 자리 우측 상단의 핀을 누르면 고정되며, 드래그 앤 드롭으로 자리를 언제든 교체할 수 있습니다.</li>
                 </ul>
             </div>
         </div>
@@ -453,16 +460,19 @@
                 <img src="캐릭터기본형.png" alt="캐릭터" class="welcome-character">
                 
                 <div id="welcomeActionGroup" style="display: flex; gap: 15px; margin-top: 35px; flex-wrap: wrap; justify-content: center;">
-                    <button type="button" class="btn btn-shuffle" style="width: auto; padding: 16px 30px; font-size: 1.15rem; border-radius: 30px;" onclick="startApp()">🚀 자리배치 시작하기</button>
-                    <button type="button" class="btn btn-sub" style="width: auto; padding: 16px 30px; font-size: 1.1rem; border-radius: 30px; border: 1px solid #10b981; color: #10b981; background: rgba(16, 185, 129, 0.1);" onclick="document.getElementById('backupInput').click()">📂 이전 배치 불러오기</button>
+                    <button type="button" class="btn btn-shuffle" style="width: auto; padding: 16px 30px; font-size: 1.15rem; border-radius: 30px;" onclick="startApp()">자리배치 시작하기</button>
+                    <button type="button" class="btn btn-sub" style="width: auto; padding: 16px 30px; font-size: 1.1rem; border-radius: 30px; border: 1px solid #10b981; color: #10b981; background: rgba(16, 185, 129, 0.1);" onclick="document.getElementById('backupInput').click()">이전 배치 불러오기</button>
                 </div>
                 
                 <div id="mainText" class="welcome-text" style="display: none;">
-                    우측 메뉴의 <span style="color:#10b981;">[STEP 1]</span> 또는 <span style="color:#10b981;">[STEP 2]</span>에서<br>설정을 완료해주세요!
+                    우측 메뉴의 <span style="color:#10b981;">[STEP 1]</span> 또는 <span style="color:#10b981;">[STEP 2]</span>에서...<br>설정을 완료해주세요!
                 </div>
             </div>
             
             <div id="seatGrid" class="seating-grid"></div>
+            
+            <div id="gridColumnToggles"></div>
+
             <div id="customMessageDisplay" class="message-display"></div>
             <div id="bottomLogo" class="school-logo-container" style="display: none;">
                 <img src="한국의료마이스터고등학교_시그니처(좌우조합).jpg" class="school-logo" alt="로고">
@@ -533,7 +543,7 @@
         document.getElementById('messageInput').addEventListener('input', e => {
             const text = e.target.value.trim();
             const displayEl = document.getElementById('customMessageDisplay');
-            displayEl.innerText = text ? '📢 ' + text : '';
+            displayEl.innerText = text ? text : '';
             displayEl.style.display = text ? 'block' : 'none';
         });
 
@@ -548,6 +558,7 @@
                 printStyle.innerHTML = '@media print { @page { size: A4 portrait; margin: 5mm; } }';
             }
             applyGridStyle();
+            renderGrid(false); // 사진 숨기기 시 꽉찬화면 보정 위해 리렌더링
         });
 
         let students = []; let seats = []; let draggedIndex = null;
@@ -586,40 +597,12 @@
             const requiredLength = Math.max(0, currentCols - 1);
             if (activeAisles.length !== requiredLength) {
                 activeAisles = new Array(requiredLength).fill(false);
-                applyLayoutType(); // 드롭다운 세팅 다시 적용
             }
-        }
-
-        // 💡 드롭다운 메뉴로 전체 통로 규칙 적용
-        function applyLayoutType() {
-            const layoutType = document.getElementById('layoutTypeSelect').value;
-            const requiredLength = Math.max(0, currentCols - 1);
-            activeAisles = new Array(requiredLength).fill(false);
-            
-            if (layoutType === 'pair') {
-                activeAisles = activeAisles.map((_, i) => i % 2 === 1);
-            } else if (layoutType === '1N1') {
-                activeAisles = activeAisles.map((_, i) => {
-                    if (i === 0) return true; // 맨 왼쪽 열 분리
-                    if (i === activeAisles.length - 1) return true; // 맨 오른쪽 열 분리
-                    return (i % 2 === 0); // 가운데는 2명씩 짝지음
-                });
-
-                // 사용자 요청: 7열일 경우 1-2-1-2-1 배치로 (정확히 떨어지도록)
-                if (currentCols === 7) {
-                    // 통로 인덱스: 0, 1, 2, 3, 4, 5
-                    // 1명-(0)-2명-(2)-1명-(3)-2명-(5)-1명
-                    activeAisles = [true, false, true, true, false, true];
-                }
-            }
-            applyGridStyle();
-            renderGrid(false);
         }
 
         // 💡 수동으로 통로 뗐다 붙였다 하는 기능
         window.toggleAisle = function(colIndex) {
             activeAisles[colIndex] = !activeAisles[colIndex];
-            document.getElementById('layoutTypeSelect').value = 'default'; // 수동 제어 시 커스텀 상태로 보이기 위해
             applyGridStyle();
             renderGrid(false);
         };
@@ -681,7 +664,7 @@
                 seats = Array(total).fill(null).map(() => ({ type: 'empty', isExcluded: false }));
                 syncStudentsArray();
                 renderGrid(true);
-                showCustomToast("빈 좌석표가 생성되었습니다.\n자리를 더블클릭하여 이름을 입력하거나 빈자리로 설정하세요.");
+                showCustomToast("빈 좌석표가 생성되었습니다. 자리를 더블클릭하여 이름을 입력하거나 빈자리로 설정하세요.");
             } else {
                 if (isNaN(colVal) || isNaN(rowVal)) {
                     const opt = getOptimalGrid(students.length);
@@ -710,7 +693,7 @@
             }
             updatePairBtn();
             selectedForPair = []; selectedForAvoid = []; renderGrid(false);
-            if(isPairMode) showCustomToast("🔗 짝꿍 설정 모드 ON\n나란히 앉힐 두 학생을 차례로 클릭하세요.");
+            if(isPairMode) showCustomToast("짝꿍 설정 모드 ON. 나란히 앉힐 두 학생을 차례로 클릭하세요.");
         }
 
         function toggleAvoidMode() {
@@ -720,17 +703,17 @@
             }
             updateAvoidBtn();
             selectedForPair = []; selectedForAvoid = []; renderGrid(false);
-            if(isAvoidMode) showCustomToast("⛔ 기피 설정 모드 ON\n멀리 떨어뜨릴 두 학생을 차례로 클릭하세요.");
+            if(isAvoidMode) showCustomToast("기피 설정 모드 ON. 멀리 떨어뜨릴 두 학생을 차례로 클릭하세요.");
         }
 
         function updatePairBtn() {
             const btn = document.getElementById('pairModeBtn');
             if (isPairMode) {
-                btn.innerText = '🔗 짝꿍 설정 (ON)';
+                btn.innerText = '짝꿍 설정 (ON)';
                 btn.style.background = 'var(--pair-color)';
                 btn.style.color = '#0f172a';
             } else {
-                btn.innerText = '🔗 짝꿍 설정 (OFF)';
+                btn.innerText = '짝꿍 설정 (OFF)';
                 btn.style.background = 'transparent';
                 btn.style.color = 'var(--pair-color)';
             }
@@ -739,11 +722,11 @@
         function updateAvoidBtn() {
             const btn = document.getElementById('avoidModeBtn');
             if (isAvoidMode) {
-                btn.innerText = '⛔ 기피 설정 (ON)';
+                btn.innerText = '기피 설정 (ON)';
                 btn.style.background = 'var(--avoid-color)';
                 btn.style.color = '#fff';
             } else {
-                btn.innerText = '⛔ 기피 설정 (OFF)';
+                btn.innerText = '기피 설정 (OFF)';
                 btn.style.background = 'transparent';
                 btn.style.color = 'var(--avoid-color)';
             }
@@ -755,7 +738,7 @@
 
             if (document.body.classList.contains('intro-mode')) startApp();
             document.getElementById('emptyState').style.display = 'none';
-            showCustomToast("엑셀 파일을 분석 중입니다... ⏳\n(잠시만 기다려주세요)");
+            showCustomToast("엑셀 파일을 분석 중입니다... 잠시만 기다려주세요.");
 
             try {
                 const zip = new JSZip();
@@ -783,7 +766,7 @@
 
                 const studentCount = Math.max(rawNames.length, mediaFiles.length);
                 if (studentCount === 0) {
-                    showCustomToast("학생 정보나 사진을 찾을 수 없습니다.\n나이스 명렬표 엑셀 파일이 맞는지 확인해 주세요.");
+                    showCustomToast("학생 정보나 사진을 찾을 수 없습니다. 나이스 명렬표 엑셀 파일이 맞는지 확인해 주세요.");
                     e.target.value = '';
                     return;
                 }
@@ -820,7 +803,7 @@
                 renderGrid(false);
 
                 syncStudentsArray();
-                showCustomToast(`✅ 엑셀 파싱 완료!\n총 ${students.length}명의 학생이 1초 만에 세팅되었습니다.`);
+                showCustomToast(`✅ 엑셀 파싱 완료! 총 ${students.length}명의 학생이 1초 만에 세팅되었습니다.`);
                 e.target.value = '';
 
             } catch (error) {
@@ -926,6 +909,44 @@
             }
         };
 
+        // 💡 새로운 통로 제어 아이콘 렌더링 함수
+        function renderColumnToggles() {
+            const toggleContainer = document.getElementById('gridColumnToggles');
+            toggleContainer.innerHTML = ''; // 초기화
+            
+            // 격자의 간격 CSS를 그대로 가져와서 동일한 패턴의 Grid 생성
+            toggleContainer.style.setProperty('--gap-size', getComputedStyle(document.documentElement).getPropertyValue('--gap-size'));
+            let tracks = [];
+            for (let i = 0; i < currentCols; i++) {
+                tracks.push('1fr');
+                if (i < currentCols - 1) {
+                    tracks.push('0'); // 아이콘은 0 너비의 가상 열에 배치 (중앙 정렬 위해)
+                }
+            }
+            toggleContainer.style.gridTemplateColumns = tracks.join(' ');
+
+            // 각 열 사이(currentCols - 1개)에 토글 버튼 배치
+            for (let i = 0; i < currentCols - 1; i++) {
+                const toggleBtn = document.createElement('div');
+                const hasAisle = activeAisles[i];
+                toggleBtn.className = 'aisle-toggle' + (hasAisle ? ' is-active' : '');
+                toggleBtn.innerHTML = hasAisle ? '><' : '<>'; // >< 는 붙이기, <> 는 띄우기
+                toggleBtn.title = hasAisle ? '간격 붙이기' : '간격 띄우기';
+                
+                // 💡 아이콘을 두 열 사이의 가상 열(index: 2*i + 1)에 위치시키고 중앙 정렬
+                toggleBtn.style.gridColumn = (2 * i + 2); 
+                toggleBtn.style.position = 'relative';
+                
+                toggleBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    toggleAisle(i);
+                };
+                toggleBtn.onmousedown = (e) => e.stopPropagation();
+                
+                toggleContainer.appendChild(toggleBtn);
+            }
+        }
+
         function renderGrid(anim = false) {
             const grid = document.getElementById('seatGrid');
             grid.innerHTML = '';
@@ -972,7 +993,7 @@
                                             seats.forEach(s => { if (s && s.avoidGroups) s.avoidGroups = s.avoidGroups.filter(id => id !== gId); });
                                         });
                                         s1.pairId = currentPairId; s2.pairId = currentPairId++;
-                                        showCustomToast("기존 기피 설정이 취소되고 🔗짝꿍으로 덮어씌워졌습니다!");
+                                        showCustomToast("기존 기피 설정이 취소되고 짝꿍으로 덮어씌워졌습니다!");
                                     } else {
                                         s1.pairId = currentPairId; s2.pairId = currentPairId++;
                                         showCustomToast("🔗 짝꿍이 연결되었습니다!");
@@ -996,11 +1017,11 @@
                                         
                                         s1.avoidGroups.push(gId);
                                         s2.avoidGroups.push(gId);
-                                        showCustomToast("기존 짝꿍 설정이 취소되고 ⛔기피 관계로 덮어씌워졌습니다!");
+                                        showCustomToast("기존 짝꿍 설정이 취소되고 기피 관계로 덮어씌워졌습니다!");
                                     } else {
                                         s1.avoidGroups.push(gId);
                                         s2.avoidGroups.push(gId);
-                                        showCustomToast("⛔ 기피 관계가 설정되었습니다!");
+                                        showCustomToast("기피 관계가 설정되었습니다!");
                                     }
                                 }
                                 selectedForAvoid = [];
@@ -1051,24 +1072,8 @@
                     }
                 }
                 
+                // 💡 이전 코드의 아이콘 렌더링 방식은 삭제 (Javascript 로직은 renderColumnToggles로 이동)
                 div.innerHTML = `<div class="seat-box-content">${contentHtml}</div>`;
-
-                // 💡 통로 제어 아이콘 추가 (첫 번째 줄에만 배치, 오른쪽 간격 여부에 따라 아이콘 형태 변경)
-                if (idx < currentCols - 1) { 
-                    const toggleBtn = document.createElement('div');
-                    const hasAisle = activeAisles[colIdx];
-                    toggleBtn.className = 'aisle-toggle' + (hasAisle ? ' is-active' : '');
-                    toggleBtn.innerHTML = hasAisle ? '><' : '<>'; // >< 는 붙이기, <> 는 띄우기
-                    toggleBtn.title = hasAisle ? '간격 붙이기' : '간격 띄우기';
-                    
-                    toggleBtn.onclick = (e) => {
-                        e.stopPropagation();
-                        toggleAisle(colIdx);
-                    };
-                    toggleBtn.onmousedown = (e) => e.stopPropagation();
-                    
-                    div.appendChild(toggleBtn);
-                }
                 
                 const skipAnim = document.getElementById('skipAnimCheck') ? document.getElementById('skipAnimCheck').checked : false;
                 if (anim && !(seat.isPinned)) {
@@ -1086,6 +1091,9 @@
                 grid.appendChild(div);
             });
             
+            // 💡 격자 리렌더링 시 통로 제어 아이콘도 리렌더링
+            renderColumnToggles();
+
             if (anim) {
                 const skipAnim = document.getElementById('skipAnimCheck') ? document.getElementById('skipAnimCheck').checked : false;
                 const delayMs = skipAnim ? 15 : 250;
@@ -1169,7 +1177,7 @@
                 return "X";
             });
             localStorage.setItem('secretSeatingPlan', JSON.stringify(secretPlanNames));
-            showCustomToast("스마트 좌석 배치 시스템 v16.6 (인터랙티브 통로 제어 적용 완료!)\n선생님, 정말 고생 많으셨습니다! ✨");
+            showCustomToast("스마트 좌석 배치 시스템 v16.7 ( professional Emoji-free UI)\n선생님, 정말 고생 많으셨습니다! ✨");
         }
 
         function triggerAnimation(element) {
@@ -1343,7 +1351,7 @@
             }
 
             renderGrid(true);
-            if (bestScore > 0) showCustomToast("복잡한 조건(기피)으로 인해 일부 완벽히 맞추지 못했을 수 있습니다.\n재배치를 돌려보세요.");
+            if (bestScore > 0) showCustomToast("복잡한 조건(기피)으로 인해 일부 완벽히 맞추지 못했을 수 있습니다. 재배치를 돌려보세요.");
         }
 
         function calcScore(tempSeats) {
@@ -1419,7 +1427,7 @@
             document.body.appendChild(downloadAnchorNode); 
             downloadAnchorNode.click(); downloadAnchorNode.remove();
             
-            showCustomToast(`[${fileName}] 파일이 저장되었습니다.\n(직접 맞추신 통로 간격 정보도 모두 안전하게 저장되었습니다)`);
+            showCustomToast(`[${fileName}] 파일이 저장되었습니다. (직접 맞추신 통로 간격 정보도 모두 안전하게 저장되었습니다)`);
         }
 
         document.getElementById('backupInput').addEventListener('change', function(e) {
@@ -1436,8 +1444,7 @@
                     
                     // 백업 파일에 통로 정보가 있으면 복구, 옛날 파일이라 없으면 배열 초기화
                     activeAisles = savedData.a || new Array(Math.max(0, currentCols - 1)).fill(false);
-                    document.getElementById('layoutTypeSelect').value = 'default';
-
+                    
                     applyGridStyle(); document.getElementById('emptyState').style.display = 'none';
 
                     seats = savedData.p.map(item => {
