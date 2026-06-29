@@ -154,6 +154,7 @@
             z-index: 50; 
         }
         
+        /* 💡 Hover 애니메이션 충돌 해결: transform 대신 margin으로 여백 계산 완벽 분리 */
         .aisle-toggle {
             width: 32px;
             height: 32px;
@@ -178,8 +179,9 @@
             background: var(--primary);
             color: var(--bg-dark);
         }
+        /* 💡 !important 제거 및 애니메이션 단순화 */
         .aisle-toggle:hover {
-            transform: scale(1.15) !important; 
+            transform: scale(1.15); 
             box-shadow: 0 6px 15px rgba(34, 211, 238, 0.4);
         }
         @media print { #gridColumnToggles { display: none !important; } }
@@ -515,7 +517,6 @@
             }
         };
 
-        // 💡 아코디언 자동 열기/닫기 헬퍼 함수
         function openAccordionSection(selector) {
             const section = document.querySelector(selector);
             if (section && section.classList.contains('closed')) {
@@ -821,7 +822,6 @@
                 showCustomToast(`엑셀 파싱 완료! 총 ${students.length}명의 학생이 세팅되었습니다.`);
                 e.target.value = '';
 
-                // 💡 파일 업로드 완료 시 STEP 2 닫고 STEP 3 열기
                 closeAccordionSection('.step2');
                 openAccordionSection('.step3');
 
@@ -864,7 +864,6 @@
             syncStudentsArray();
             e.target.value = '';
 
-            // 💡 파일 업로드 완료 시 STEP 2 닫고 STEP 3 열기
             closeAccordionSection('.step2');
             openAccordionSection('.step3');
         });
@@ -933,6 +932,7 @@
             }
         };
 
+        // 💡 transform 충돌을 피하기 위해 margin-right로 위치를 계산하는 완벽한 렌더링 로직
         function renderColumnToggles() {
             const toggleContainer = document.getElementById('gridColumnToggles');
             toggleContainer.innerHTML = '';
@@ -953,6 +953,7 @@
                 wrapper.style.height = '32px';
                 wrapper.style.position = 'relative'; 
                 wrapper.style.display = 'flex';
+                wrapper.style.alignItems = 'center'; // 수직 중앙 정렬
                 
                 const hasAisle = activeAisles[i];
                 const toggleBtn = document.createElement('div');
@@ -963,16 +964,15 @@
                 if (hasAisle) {
                     wrapper.style.gridColumn = currentTrack + 1;
                     wrapper.style.justifyContent = 'center';
-                    wrapper.style.alignItems = 'center';
                     currentTrack += 2; 
                 } else {
                     wrapper.style.gridColumn = currentTrack;
+                    wrapper.style.justifyContent = 'flex-end'; // 우측 끝에 붙임
                     currentTrack += 1;
                     
-                    toggleBtn.style.position = 'absolute';
-                    toggleBtn.style.right = '0';
-                    toggleBtn.style.top = '0';
-                    toggleBtn.style.transform = 'translateX(calc(50% + var(--gap-size) / 2))';
+                    // 💡 transform을 사용하지 않고 margin-right를 이용해 정확히 간격의 절반만큼 밀어냅니다.
+                    // 아이콘 크기의 절반(16px) + 간격의 절반(var(--gap-size)/2)
+                    toggleBtn.style.marginRight = 'calc(-16px - (var(--gap-size) / 2))';
                 }
 
                 toggleBtn.onclick = (e) => {
@@ -1213,7 +1213,7 @@
                 return "X";
             });
             localStorage.setItem('secretSeatingPlan', JSON.stringify(secretPlanNames));
-            showCustomToast("스마트 좌석 배치 시스템 v17.0 (자동 플로우 완료!)\n선생님, 정말 고생 많으셨습니다! ✨");
+            showCustomToast("스마트 좌석 배치 시스템 v17.1 (버그 픽스 완료!)\n선생님, 정말 고생 많으셨습니다! ✨");
         }
 
         function triggerAnimation(element) {
@@ -1226,7 +1226,6 @@
             if (students.length === 0 || isShuffling) return;
             isShuffling = true;
 
-            // 💡 배치 버튼 클릭 시 STEP 4 열어주기 (STEP 3는 닫지 않음)
             openAccordionSection('.step4');
             
             const isCtrlPressed = event && event.ctrlKey;
