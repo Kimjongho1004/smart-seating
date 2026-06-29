@@ -42,7 +42,6 @@
         .sidebar { width: var(--sidebar-width); background: var(--card-bg); padding: 25px; border-left: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; gap: 15px; overflow-y: auto; box-shadow: -5px 0 15px rgba(0,0,0,0.3); z-index: 100; flex-shrink: 0; box-sizing: border-box; }
         body.intro-mode .sidebar { margin-right: calc(-1 * var(--sidebar-width)); transform: translateX(100%); opacity: 0; pointer-events: none; }
         
-        /* 💡 캐릭터 애니메이션 차분하게 수정 */
         .welcome-character { max-width: 450px; height: auto; border-radius: 20px; filter: drop-shadow(0 0 40px rgba(34, 211, 238, 0.25)) drop-shadow(0 15px 25px rgba(0,0,0,0.6)); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.4s ease; }
         body.intro-mode .welcome-character:hover { transform: scale(1.03); filter: drop-shadow(0 0 50px rgba(34, 211, 238, 0.8)) drop-shadow(0 25px 35px rgba(0,0,0,0.7)); }
         
@@ -64,10 +63,14 @@
         .btn-accent:hover { background: #a5f3fc; }
 
         .highlight-section { padding: 22px; border-radius: 16px; margin: 4px 0; background: linear-gradient(145deg, var(--section-bg), rgba(255,255,255,0.02)); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+        
+        /* 메뉴 일관성을 위한 디자인 통일 */
         .step1 { background: linear-gradient(145deg, var(--section-bg), rgba(139, 92, 246, 0.12)); border-color: rgba(139, 92, 246, 0.35); }
         .step2 { background: linear-gradient(145deg, var(--section-bg), rgba(16, 185, 129, 0.12)); border-color: rgba(16, 185, 129, 0.35); }
         .step3 { background: linear-gradient(145deg, var(--section-bg), rgba(34, 211, 238, 0.12)); border-color: rgba(34, 211, 238, 0.35); }
         .step4 { background: linear-gradient(145deg, var(--section-bg), rgba(244, 63, 94, 0.12)); border-color: rgba(244, 63, 94, 0.35); }
+        .step-data { background: linear-gradient(145deg, var(--section-bg), rgba(245, 158, 11, 0.12)); border-color: rgba(245, 158, 11, 0.35); }
+        .step-tips { background: linear-gradient(145deg, var(--section-bg), rgba(59, 130, 246, 0.12)); border-color: rgba(59, 130, 246, 0.35); }
 
         .accordion-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; transition: opacity 0.2s; }
         .accordion-header:hover { opacity: 0.7; }
@@ -100,14 +103,14 @@
         #hidePhotoCheck:checked { background-color: var(--pinned-color); border-color: var(--pinned-color); box-shadow: 0 0 10px rgba(244, 63, 94, 0.4); }
         #hidePhotoCheck:checked::after { border-color: #fff; }
         
-        .usage-tips { margin-top: auto; padding: 18px 15px; background: rgba(0,0,0,0.15); border-radius: 8px; font-size: 0.85rem; color: #cbd5e1; line-height: 1.6; border: 1px solid rgba(255,255,255,0.08); }
-        .usage-tips ul { list-style: none; padding: 0; margin: 0; word-break: keep-all; }
+        /* 팁 컨텐츠 텍스트 디자인 수정 */
+        .usage-tips ul { list-style: none; padding: 0; margin: 0; word-break: keep-all; font-size: 0.85rem; color: #cbd5e1; line-height: 1.6; }
         .usage-tips li { margin-bottom: 10px; padding-left: 16px; position: relative; }
         .usage-tips li:last-child { margin-bottom: 0; }
-        .usage-tips li::before { content: "▪"; position: absolute; left: 0; top: 1px; color: var(--primary); font-size: 0.8rem; }
+        .usage-tips li::before { content: "▪"; position: absolute; left: 0; top: 1px; color: #3b82f6; font-size: 0.8rem; }
         .usage-tips li strong { color: #f1f5f9; font-weight: 700; }
         
-        .credit-btn { background: transparent; border: none; color: rgba(255, 255, 255, 0.3); font-size: 0.85rem; text-align: left; width: 100%; padding: 5px 10px; margin-top: 5px; cursor: pointer; transition: color 0.3s; font-family: inherit; letter-spacing: 1px; box-sizing: border-box; font-weight: 500; }
+        .credit-btn { background: transparent; border: none; color: rgba(255, 255, 255, 0.3); font-size: 0.85rem; text-align: left; width: 100%; padding: 5px 10px; margin-top: auto; cursor: pointer; transition: color 0.3s; font-family: inherit; letter-spacing: 1px; box-sizing: border-box; font-weight: 500; }
         .credit-btn:hover { color: var(--primary); }
 
         .main-content { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
@@ -121,7 +124,10 @@
         .welcome-text { margin-top: 30px; font-size: 1.2rem; color: var(--text-dim); text-align: center; line-height: 1.6; letter-spacing: 1px; font-weight: 600; }
         .welcome-text span { color: var(--primary); font-weight: 800; }
         
-        .seating-grid { display: grid; grid-template-columns: var(--grid-template, repeat(var(--grid-cols), 1fr)); grid-template-rows: repeat(var(--grid-rows), minmax(0, 1fr)); gap: var(--gap-size); width: 100%; flex-grow: 1; align-content: stretch; position: relative; }
+        /* 💡 래퍼를 활용한 정밀한 통로 아이콘 매핑 */
+        #seatGridWrapper { position: relative; width: 100%; flex-grow: 1; display: flex; flex-direction: column; }
+        
+        .seating-grid { display: grid; grid-template-columns: var(--grid-template, repeat(var(--grid-cols), 1fr)); grid-template-rows: repeat(var(--grid-rows), minmax(0, 1fr)); gap: var(--gap-size); width: 100%; flex-grow: 1; align-content: stretch; position: relative; z-index: 1; }
         
         .seat-box { position: relative; background: var(--card-bg); border-radius: 12px; display: flex; flex-direction: row-reverse; align-items: center; justify-content: space-between; padding: 0; box-shadow: 0 4px 8px rgba(0,0,0,0.3); cursor: grab; transition: transform 0.6s, opacity 0.5s, filter 0.5s; overflow: visible; border: 3px solid transparent; }
         .seat-box:active { cursor: grabbing; }
@@ -141,26 +147,19 @@
         .btn-include { display: inline-block; margin-top: 8px; padding: 6px 10px; background: rgba(16, 185, 129, 0.15); color: #6ee7b7; border-radius: 6px; font-size: 0.8rem; cursor: pointer; transition: 0.2s; font-weight: 700; border: 1px solid rgba(16, 185, 129, 0.3); }
         .btn-include:hover { background: rgba(16, 185, 129, 0.4); color: #fff; }
 
-        /* 💡 새로운 통로 제어 아이콘 영역 (Interactive Aisle Toggle Area) CSS */
+        /* 💡 수정된 통로 제어 아이콘 영역 - Grid 구조 위에 완벽하게 매핑됨 */
         #gridColumnToggles {
-            width: calc(100% - 60px); /* #captureArea padding 보정 */
-            display: grid; 
-            gap: var(--gap-size);
             position: absolute; 
-            top: calc(30px + 60px + 25px); /* #captureArea padding + #mainTitle height + podium margin 보정 */
-            left: 30px; /* #captureArea padding 보정 */
-            pointer-events: none; /* 아이콘 자체에만 반응하게 설정 */
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 0; /* 시각적인 공간은 차지하지 않음 */
+            display: grid; 
+            pointer-events: none; /* 아이콘 영역 클릭 시 뒤쪽 Grid 무시되는 현상 방지 */
             z-index: 50; 
-            display: none; /* 기본 숨김 */
         }
         
-        #seatGrid:has(.seat-box) ~ #gridColumnToggles { display: grid; } /* 격자에 자리가 있을 때만 표시 */
-        
         .aisle-toggle {
-            position: absolute;
-            top: 0; 
-            right: 0; /* colIndex + aislesBefore 비율 계산 후Javascript로 동적 제어 */
-            transform: translate(50%, -50%); /* 아이콘 자체 중앙 배치 */
             width: 32px;
             height: 32px;
             background: var(--card-bg);
@@ -177,17 +176,20 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
             letter-spacing: -1.5px;
             user-select: none;
-            pointer-events: auto; /* 아이콘은 클릭 가능 */
+            pointer-events: auto; /* 아이콘 자체는 다시 클릭 가능하도록 설정 */
+            
+            /* 버튼을 부모 높이 0px 기준 위로 절반 올려서 격자 선에 맞춤 */
+            margin-top: -16px; 
         }
         .aisle-toggle.is-active {
             background: var(--primary);
             color: var(--bg-dark);
         }
         .aisle-toggle:hover {
-            transform: translate(50%, -50%) scale(1.15);
+            transform: scale(1.15) !important; /* Wrapper의 transform 무시 */
             box-shadow: 0 6px 15px rgba(34, 211, 238, 0.4);
         }
-        @media print { .aisle-toggle { display: none !important; } }
+        @media print { #gridColumnToggles { display: none !important; } }
 
         .badge-container { position: absolute; bottom: 8px; left: 8px; display: flex; gap: 4px; flex-wrap: wrap; z-index: 10; pointer-events: auto; max-width: 90%; }
         .pair-label, .avoid-label { font-size: 0.75rem; padding: 3px 6px; border-radius: 6px; font-weight: 900; box-shadow: 0 2px 4px rgba(0,0,0,0.3); cursor: pointer; transition: transform 0.1s; }
@@ -207,7 +209,6 @@
         .seat-number { font-size: 0.7em; opacity: 0.85; margin-bottom: 2px; }
         .seat-name { font-size: 1em; }
         
-        /* [웹 화면] 사진 숨기기 텍스트 크기 최적화 */
         .seating-grid.hide-photos .student-img { display: none !important; }
         .seating-grid.hide-photos .seat-box-content { flex-direction: column; justify-content: center; align-items: center; padding: 15px; }
         .seating-grid.hide-photos .student-name { 
@@ -230,7 +231,7 @@
         .seat-box.hidden-state { opacity: 0; transform: scale(0.4) translateY(60px); filter: blur(8px); }
         
         #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(5px); }
-        .modal-body { background: var(--card-bg); padding: 40px; border-radius: 166px; width: 360px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .modal-body { background: var(--card-bg); padding: 40px; border-radius: 16px; width: 360px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
         .modal-body h3 { font-size: 1.4rem; }
         
         #customToast { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--card-bg); color: var(--primary); padding: 18px 40px; border-radius: 30px; border: 1px solid rgba(34, 211, 238, 0.3); box-shadow: 0 15px 30px rgba(0,0,0,0.6); font-size: 1.2rem; font-weight: 700; opacity: 0; transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease; z-index: 3000; pointer-events: none; letter-spacing: 1px; text-align: center; white-space: pre-line; }
@@ -341,8 +342,7 @@
                     </div>
                     <button type="button" class="btn btn-sub" style="width:100%; padding: 10px; margin-top: 5px;" onclick="applyLayoutSettings()">적용 / 초기화</button>
                 </div>
-
-                </div>
+            </div>
         </section>
 
         <section class="highlight-section step2 accordion-section closed">
@@ -416,37 +416,37 @@
             </div>
         </section>
 
-        <section style="background: rgba(0,0,0,0.15); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); margin-top: 5px;" class="accordion-section closed">
+        <section class="highlight-section step-data accordion-section closed">
             <div class="accordion-header" onclick="toggleAccordion(this)">
-                <h2 style="font-size: 0.95rem; color: #cbd5e1; margin: 0; border: none; padding: 0;">좌석 데이터 관리 (백업/복구)</h2>
-                <span class="accordion-icon" style="color: #cbd5e1;">▼</span>
+                <h2 style="margin: 0; color: #f59e0b; font-size: 1.15rem; border-left: 4px solid #f59e0b; padding-left: 10px;">데이터 관리 및 백업</h2>
+                <span class="accordion-icon" style="color: #f59e0b;">▼</span>
             </div>
             <div class="accordion-content" style="display: none; margin-top: 15px;">
                 <div class="btn-row">
                     <button type="button" class="btn btn-sub" style="border: 1px solid #10b981; color: #10b981; font-size: 0.9rem;" onclick="document.getElementById('backupInput').click()">불러오기</button>
-                    <button type="button" class="btn btn-sub" style="border: 1px solid var(--primary); color: var(--primary); font-size: 0.9rem;" onclick="downloadBackupFile()">현재 저장</button>
+                    <button type="button" class="btn btn-sub" style="border: 1px solid #f59e0b; color: #f59e0b; font-size: 0.9rem;" onclick="downloadBackupFile()">현재 저장</button>
                     <input type="file" id="backupInput" accept=".json" style="display:none">
                 </div>
             </div>
         </section>
 
-        <div class="usage-tips accordion-section closed">
+        <section class="highlight-section step-tips accordion-section closed" style="margin-bottom: auto;">
             <div class="accordion-header" onclick="toggleAccordion(this)">
-                <h3 style="margin: 0; border: none; padding: 0;">사용 안내 및 팁</h3>
-                <span class="accordion-icon" style="color: var(--primary);">▼</span>
+                <h2 style="margin: 0; color: #3b82f6; font-size: 1.15rem; border-left: 4px solid #3b82f6; padding-left: 10px;">사용 안내 및 팁</h2>
+                <span class="accordion-icon" style="color: #3b82f6;">▼</span>
             </div>
-            <div class="accordion-content" style="display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);">
+            <div class="accordion-content usage-tips" style="display: none; margin-top: 15px;">
                 <ul>
-                    <li><strong>[초간편 통로 제어]</strong> 생성된 좌석 맨 윗줄의 <strong>열 사이 중앙에 위치한 <> (띄우기), >< (붙이기) 아이콘</strong>을 클릭하여 내 교실에 딱 맞는 통로를 마음대로 구성해 보세요!</li>
+                    <li><strong>[초간편 통로 제어]</strong> 생성된 격자의 윗부분에 띄워진 <strong><> (띄우기), >< (붙이기) 아이콘</strong>을 클릭하여 내 교실에 딱 맞는 통로를 마음대로 구성해 보세요.</li>
                     <li><strong>[빈자리 고정]</strong> 생성된 빈자리를 클릭하여 '배정 제외' 처리하면, 무작위 배치 시 해당 자리에는 학생이 배치되지 않습니다.</li>
                     <li><strong>[명단 준비]</strong> 엑셀 파일을 업로드하면 사진과 이름이 자동 분리되어 즉시 세팅됩니다.</li>
                     <li><strong>[짝꿍 및 기피 설정]</strong> 설정 버튼을 켜고 적용할 두 명의 학생을 차례로 클릭하세요. 직접 띄워둔 통로를 건너뛰며 억지로 짝꿍이 맺어지지 않도록 최적화되어 있습니다.</li>
                     <li><strong>[수동 변경 및 고정]</strong> 자리 우측 상단의 핀을 누르면 고정되며, 드래그 앤 드롭으로 자리를 언제든 교체할 수 있습니다.</li>
                 </ul>
             </div>
-        </div>
+        </section>
         
-        <button type="button" class="credit-btn" onclick="saveSecretPlan()">© Made by KimJongho</button>
+        <button type="button" class="credit-btn" onclick="saveSecretPlan()">Made by KimJongho</button>
     </aside>
 
     <main class="main-content">
@@ -465,14 +465,15 @@
                 </div>
                 
                 <div id="mainText" class="welcome-text" style="display: none;">
-                    우측 메뉴의 <span style="color:#10b981;">[STEP 1]</span> 또는 <span style="color:#10b981;">[STEP 2]</span>에서...<br>설정을 완료해주세요!
+                    우측 메뉴의 <span style="color:#10b981;">[STEP 1]</span> 또는 <span style="color:#10b981;">[STEP 2]</span>에서<br>설정을 완료해주세요.
                 </div>
             </div>
             
-            <div id="seatGrid" class="seating-grid"></div>
+            <div id="seatGridWrapper">
+                <div id="gridColumnToggles"></div>
+                <div id="seatGrid" class="seating-grid"></div>
+            </div>
             
-            <div id="gridColumnToggles"></div>
-
             <div id="customMessageDisplay" class="message-display"></div>
             <div id="bottomLogo" class="school-logo-container" style="display: none;">
                 <img src="한국의료마이스터고등학교_시그니처(좌우조합).jpg" class="school-logo" alt="로고">
@@ -558,7 +559,7 @@
                 printStyle.innerHTML = '@media print { @page { size: A4 portrait; margin: 5mm; } }';
             }
             applyGridStyle();
-            renderGrid(false); // 사진 숨기기 시 꽉찬화면 보정 위해 리렌더링
+            renderColumnToggles(); 
         });
 
         let students = []; let seats = []; let draggedIndex = null;
@@ -592,7 +593,6 @@
             return { cols: c, rows: r };
         }
 
-        // 💡 통로 초기화 로직
         function initAisles() {
             const requiredLength = Math.max(0, currentCols - 1);
             if (activeAisles.length !== requiredLength) {
@@ -604,6 +604,7 @@
         window.toggleAisle = function(colIndex) {
             activeAisles[colIndex] = !activeAisles[colIndex];
             applyGridStyle();
+            renderColumnToggles();
             renderGrid(false);
         };
 
@@ -632,12 +633,11 @@
                 root.style.setProperty('--print-name-font', isHide ? '32pt' : '12.5pt');
             }
 
-            // 💡 통로 정보(activeAisles)를 기반으로 CSS Grid 트랙(비율) 재구성
             let tracks = [];
             for (let i = 0; i < currentCols; i++) {
                 tracks.push('1fr');
                 if (i < currentCols - 1 && activeAisles[i]) {
-                    tracks.push('0.15fr'); // 띄워진 통로 간격 부여
+                    tracks.push('0.15fr'); 
                 }
             }
             root.style.setProperty('--grid-template', tracks.join(' '));
@@ -657,12 +657,13 @@
                 document.getElementById('colInput').value = currentCols;
                 document.getElementById('rowInput').value = currentRows;
                 
-                initAisles(); // 변경된 줄 수에 맞게 통로 배열 초기화
+                initAisles(); 
                 applyGridStyle();
                 
                 const total = currentCols * currentRows;
                 seats = Array(total).fill(null).map(() => ({ type: 'empty', isExcluded: false }));
                 syncStudentsArray();
+                renderColumnToggles();
                 renderGrid(true);
                 showCustomToast("빈 좌석표가 생성되었습니다. 자리를 더블클릭하여 이름을 입력하거나 빈자리로 설정하세요.");
             } else {
@@ -679,9 +680,10 @@
                 document.getElementById('colInput').value = currentCols;
                 document.getElementById('rowInput').value = currentRows;
                 
-                initAisles(); // 변경된 줄 수에 맞게 통로 배열 초기화
+                initAisles(); 
                 applyGridStyle(); 
                 rebuildSeatsArray(); 
+                renderColumnToggles();
                 renderGrid(true);
             }
         }
@@ -800,10 +802,11 @@
                 initAisles();
                 applyGridStyle(); 
                 rebuildSeatsArray(); 
+                renderColumnToggles();
                 renderGrid(false);
 
                 syncStudentsArray();
-                showCustomToast(`✅ 엑셀 파싱 완료! 총 ${students.length}명의 학생이 1초 만에 세팅되었습니다.`);
+                showCustomToast(`엑셀 파싱 완료! 총 ${students.length}명의 학생이 세팅되었습니다.`);
                 e.target.value = '';
 
             } catch (error) {
@@ -840,7 +843,8 @@
             document.getElementById('rowInput').value = currentRows;
             
             initAisles();
-            applyGridStyle(); rebuildSeatsArray(); renderGrid(false);
+            applyGridStyle(); rebuildSeatsArray(); 
+            renderColumnToggles(); renderGrid(false);
             syncStudentsArray();
             e.target.value = '';
         });
@@ -902,40 +906,54 @@
                 seats[idx].isExcluded = !seats[idx].isExcluded;
                 renderGrid(false);
                 if(seats[idx].isExcluded) {
-                    showCustomToast("🚫 해당 빈자리가 무작위 배정에서 제외되었습니다.");
+                    showCustomToast("해당 빈자리가 무작위 배정에서 제외되었습니다.");
                 } else {
-                    showCustomToast("✅ 해당 빈자리가 다시 배정에 포함됩니다.");
+                    showCustomToast("해당 빈자리가 다시 배정에 포함됩니다.");
                 }
             }
         };
 
-        // 💡 새로운 통로 제어 아이콘 렌더링 함수
+        // 💡 CSS Grid 시스템 구조를 완벽하게 복제하여 아이콘을 두 열 사이 중앙에 배치
         function renderColumnToggles() {
             const toggleContainer = document.getElementById('gridColumnToggles');
-            toggleContainer.innerHTML = ''; // 초기화
+            toggleContainer.innerHTML = '';
             
-            // 격자의 간격 CSS를 그대로 가져와서 동일한 패턴의 Grid 생성
-            toggleContainer.style.setProperty('--gap-size', getComputedStyle(document.documentElement).getPropertyValue('--gap-size'));
+            // #seatGrid와 동일한 gap 적용
+            const root = document.documentElement;
+            toggleContainer.style.gap = root.style.getPropertyValue('--gap-size') || '25px';
+            
             let tracks = [];
             for (let i = 0; i < currentCols; i++) {
                 tracks.push('1fr');
-                if (i < currentCols - 1) {
-                    tracks.push('0'); // 아이콘은 0 너비의 가상 열에 배치 (중앙 정렬 위해)
+                if (i < currentCols - 1 && activeAisles[i]) {
+                    tracks.push('0.15fr');
                 }
             }
             toggleContainer.style.gridTemplateColumns = tracks.join(' ');
 
-            // 각 열 사이(currentCols - 1개)에 토글 버튼 배치
+            let currentTrack = 1; // 1-based index for grid-column
             for (let i = 0; i < currentCols - 1; i++) {
-                const toggleBtn = document.createElement('div');
-                const hasAisle = activeAisles[i];
-                toggleBtn.className = 'aisle-toggle' + (hasAisle ? ' is-active' : '');
-                toggleBtn.innerHTML = hasAisle ? '><' : '<>'; // >< 는 붙이기, <> 는 띄우기
-                toggleBtn.title = hasAisle ? '간격 붙이기' : '간격 띄우기';
+                const wrapper = document.createElement('div');
+                wrapper.style.height = '0';
+                wrapper.style.display = 'flex';
                 
-                // 💡 아이콘을 두 열 사이의 가상 열(index: 2*i + 1)에 위치시키고 중앙 정렬
-                toggleBtn.style.gridColumn = (2 * i + 2); 
-                toggleBtn.style.position = 'relative';
+                const hasAisle = activeAisles[i];
+                if (hasAisle) {
+                    wrapper.style.gridColumn = currentTrack + 1; // 0.15fr 통로 트랙에 쏙 집어넣음
+                    wrapper.style.justifyContent = 'center';     // 정중앙 정렬
+                    currentTrack += 2;
+                } else {
+                    wrapper.style.gridColumn = currentTrack;     // 왼쪽 학생 트랙에 넣음
+                    wrapper.style.justifyContent = 'flex-end';   // 오른쪽 끝에 붙임
+                    wrapper.style.marginRight = 'calc(var(--gap-size) / -2)'; // 간격 절반만큼 당겨와서 완벽히 선 위 중앙에 안착
+                    wrapper.style.transform = 'translateX(50%)'; 
+                    currentTrack += 1;
+                }
+
+                const toggleBtn = document.createElement('div');
+                toggleBtn.className = 'aisle-toggle' + (hasAisle ? ' is-active' : '');
+                toggleBtn.innerHTML = hasAisle ? '><' : '<>';
+                toggleBtn.title = hasAisle ? '간격 붙이기' : '간격 띄우기';
                 
                 toggleBtn.onclick = (e) => {
                     e.stopPropagation();
@@ -943,7 +961,8 @@
                 };
                 toggleBtn.onmousedown = (e) => e.stopPropagation();
                 
-                toggleContainer.appendChild(toggleBtn);
+                wrapper.appendChild(toggleBtn);
+                toggleContainer.appendChild(wrapper);
             }
         }
 
@@ -956,7 +975,6 @@
                 div.className = 'seat-box';
                 div.setAttribute('draggable', 'true');
                 
-                // 💡 통로 정보 배열(activeAisles)을 사용하여 각 박스의 CSS Grid 열 위치를 정확하게 매핑
                 let colIdx = idx % currentCols;
                 let aislesBefore = 0;
                 for (let c = 0; c < colIdx; c++) {
@@ -996,7 +1014,7 @@
                                         showCustomToast("기존 기피 설정이 취소되고 짝꿍으로 덮어씌워졌습니다!");
                                     } else {
                                         s1.pairId = currentPairId; s2.pairId = currentPairId++;
-                                        showCustomToast("🔗 짝꿍이 연결되었습니다!");
+                                        showCustomToast("짝꿍이 연결되었습니다!");
                                     }
                                 }
                                 selectedForPair = [];
@@ -1072,7 +1090,6 @@
                     }
                 }
                 
-                // 💡 이전 코드의 아이콘 렌더링 방식은 삭제 (Javascript 로직은 renderColumnToggles로 이동)
                 div.innerHTML = `<div class="seat-box-content">${contentHtml}</div>`;
                 
                 const skipAnim = document.getElementById('skipAnimCheck') ? document.getElementById('skipAnimCheck').checked : false;
@@ -1091,9 +1108,6 @@
                 grid.appendChild(div);
             });
             
-            // 💡 격자 리렌더링 시 통로 제어 아이콘도 리렌더링
-            renderColumnToggles();
-
             if (anim) {
                 const skipAnim = document.getElementById('skipAnimCheck') ? document.getElementById('skipAnimCheck').checked : false;
                 const delayMs = skipAnim ? 15 : 250;
@@ -1177,7 +1191,7 @@
                 return "X";
             });
             localStorage.setItem('secretSeatingPlan', JSON.stringify(secretPlanNames));
-            showCustomToast("스마트 좌석 배치 시스템 v16.7 ( professional Emoji-free UI)\n선생님, 정말 고생 많으셨습니다! ✨");
+            showCustomToast("스마트 좌석 배치 시스템 v16.8 (통로 아이콘 완벽 매핑)\n선생님, 정말 고생 많으셨습니다! ✨");
         }
 
         function triggerAnimation(element) {
@@ -1320,16 +1334,14 @@
                     
                     let isAdjacent = (r1 === r2) && (Math.abs(idx1 - idx2) === 1);
                     
-                    // 💡 선생님이 만든 실제 통로(activeAisles)를 완벽하게 인지하고 검사
                     if (isAdjacent) {
                         let minC = Math.min(c1, c2);
-                        if (activeAisles[minC]) isAdjacent = false; // 사이에 띄워진 통로가 있다면 짝꿍 무효화!
+                        if (activeAisles[minC]) isAdjacent = false;
                     }
 
                     if (!isAdjacent) {
                         let getTargets = (c) => {
                             let targets = [];
-                            // 통로가 없는 바로 양옆 자리만 유효한 타겟으로 인식
                             if (c > 0 && !activeAisles[c - 1]) targets.push(c - 1);
                             if (c < currentCols - 1 && !activeAisles[c]) targets.push(c + 1);
                             return targets;
@@ -1389,7 +1401,6 @@
                     
                     let isAdjacent = (r1 === r2) && (Math.abs(arr[0] - arr[1]) === 1);
                     
-                    // 💡 무작위 페널티 점수 계산 시에도 통로를 확실하게 인지
                     if (isAdjacent) {
                         let minC = Math.min(c1, c2);
                         if (activeAisles[minC]) isAdjacent = false; 
@@ -1417,7 +1428,6 @@
                 if (s.type === 'empty' && s.isExcluded) return "EXCLUDED";
                 return "X";
             });
-            // 💡 통로 정보(activeAisles)도 완벽하게 같이 백업합니다
             const payload = { c: currentCols, r: currentRows, p: planData, a: activeAisles };
             
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload));
@@ -1427,7 +1437,7 @@
             document.body.appendChild(downloadAnchorNode); 
             downloadAnchorNode.click(); downloadAnchorNode.remove();
             
-            showCustomToast(`[${fileName}] 파일이 저장되었습니다. (직접 맞추신 통로 간격 정보도 모두 안전하게 저장되었습니다)`);
+            showCustomToast(`[${fileName}] 파일이 저장되었습니다.`);
         }
 
         document.getElementById('backupInput').addEventListener('change', function(e) {
@@ -1442,7 +1452,6 @@
                     currentCols = savedData.c; currentRows = savedData.r;
                     document.getElementById('colInput').value = currentCols; document.getElementById('rowInput').value = currentRows;
                     
-                    // 백업 파일에 통로 정보가 있으면 복구, 옛날 파일이라 없으면 배열 초기화
                     activeAisles = savedData.a || new Array(Math.max(0, currentCols - 1)).fill(false);
                     
                     applyGridStyle(); document.getElementById('emptyState').style.display = 'none';
@@ -1464,7 +1473,9 @@
                                             : { type: 'student', name: name, number: number, imgSrc: defaultAvatar, isPinned: false, pairId: pId, avoidGroups: aGroups };
                     });
                     
-                    syncStudentsArray(); renderGrid(true); showCustomToast("통로와 배치를 포함하여 성공적으로 복구했습니다!");
+                    syncStudentsArray(); 
+                    renderColumnToggles();
+                    renderGrid(true); showCustomToast("통로와 배치를 포함하여 성공적으로 복구했습니다.");
                 } catch(err) { showCustomToast("파일을 읽을 수 없습니다. 올바른 백업 파일인지 확인해 주세요."); }
             };
             reader.readAsText(file); e.target.value = ''; 
@@ -1495,7 +1506,6 @@
                 const clones = Array.from(grid.children).reverse();
                 grid.innerHTML = ''; 
                 clones.forEach((c, idx) => {
-                    // 💡 인쇄 시에도 통로 매핑
                     let colIdx = idx % currentCols;
                     let aislesBefore = 0;
                     for (let x = 0; x < colIdx; x++) { if (activeAisles[x]) aislesBefore++; }
@@ -1533,8 +1543,6 @@
                 document.getElementById('captureArea').insertBefore(podium, document.getElementById('emptyState'));
             }
         }
-        initAisles();
-        applyGridStyle();
     </script>
 </body>
 </html>
