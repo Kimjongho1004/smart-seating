@@ -3,24 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>스마트 좌석 배치 시스템 - 교실 최적화</title>
+    <title>ClassGrid - 스마트 좌석 배치 시스템</title>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
         :root {
             --primary: #22d3ee;
+            --primary-hover: #06b6d4;
             --bg-dark: #0f172a;
-            --card-bg: #27364b; 
-            --section-bg: #334863; 
+            --card-bg: #1e293b; 
+            --section-bg: #334155; 
             --pinned-color: #f43f5e;
             --pair-color: #fbbf24;
             --avoid-color: #ef4444;
-            --text-main: #f1f5f9;
+            --front-color: #10b981;
+            --near-color: #a855f7; 
+            --text-main: #f8fafc;
             --text-dim: #94a3b8;
             
-            /* 💡 3분할 레이아웃을 위한 좌/우 패널 너비 설정 */
-            --sidebar-left-width: 360px;
-            --sidebar-right-width: 320px;
+            --sidebar-left-width: 380px;
+            --sidebar-right-width: 340px;
             
             --grid-cols: 4;
             --grid-rows: 4;
@@ -30,8 +32,7 @@
             --print-name-font: 12.5pt;
             --box-padding: 20px;
             --print-box-padding: 2mm;
-            --pin-size: 38px;
-            --pin-icon: 20px;
+            --pin-size: 34px;
         }
 
         /* 커스텀 스크롤바 */
@@ -42,86 +43,93 @@
 
         body { font-family: 'Pretendard', 'Malgun Gothic', sans-serif; margin: 0; display: flex; flex-direction: row; height: 100vh; background-color: var(--bg-dark); color: var(--text-main); overflow: hidden; user-select: none; }
         
-        /* 💡 3분할: 좌측/우측 사이드바 공통 속성 및 개별 속성 분리 */
-        .sidebar-left, .sidebar-right { background: var(--card-bg); padding: 25px; overflow-y: auto; z-index: 100; flex-shrink: 0; box-sizing: border-box; height: 100vh; transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), margin 0.5s ease, opacity 0.4s ease; }
+        .sidebar-left, .sidebar-right { background: var(--card-bg); padding: 30px 25px; overflow-y: auto; z-index: 100; flex-shrink: 0; box-sizing: border-box; height: 100vh; transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), margin 0.5s ease, opacity 0.4s ease; }
         
-        .sidebar-left { width: var(--sidebar-left-width); border-right: 1px solid rgba(255,255,255,0.05); box-shadow: 5px 0 15px rgba(0,0,0,0.2); }
-        .sidebar-right { width: var(--sidebar-right-width); border-left: 1px solid rgba(255,255,255,0.05); box-shadow: -5px 0 15px rgba(0,0,0,0.2); display: flex; flex-direction: column; }
+        .sidebar-left { width: var(--sidebar-left-width); border-right: 1px solid rgba(255,255,255,0.05); box-shadow: 5px 0 20px rgba(0,0,0,0.3); }
+        .sidebar-right { width: var(--sidebar-right-width); border-left: 1px solid rgba(255,255,255,0.05); box-shadow: -5px 0 20px rgba(0,0,0,0.3); display: flex; flex-direction: column; }
         
-        /* 시작 화면일 때 양쪽으로 숨기기 애니메이션 */
         body.intro-mode .sidebar-left { margin-left: calc(-1 * var(--sidebar-left-width)); transform: translateX(-100%); opacity: 0; pointer-events: none; }
         body.intro-mode .sidebar-right { margin-right: calc(-1 * var(--sidebar-right-width)); transform: translateX(100%); opacity: 0; pointer-events: none; }
         
-        .welcome-character { max-width: 450px; height: auto; border-radius: 20px; filter: drop-shadow(0 0 40px rgba(34, 211, 238, 0.25)) drop-shadow(0 15px 25px rgba(0,0,0,0.6)); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.4s ease; }
-        body.intro-mode .welcome-character:hover { transform: scale(1.03); filter: drop-shadow(0 0 50px rgba(34, 211, 238, 0.8)) drop-shadow(0 25px 35px rgba(0,0,0,0.7)); }
+        .welcome-character { max-width: 450px; height: auto; border-radius: 20px; filter: drop-shadow(0 0 40px rgba(34, 211, 238, 0.15)) drop-shadow(0 15px 25px rgba(0,0,0,0.5)); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.4s ease; }
+        body.intro-mode .welcome-character:hover { transform: scale(1.03); filter: drop-shadow(0 0 50px rgba(34, 211, 238, 0.6)) drop-shadow(0 25px 35px rgba(0,0,0,0.6)); }
         
-        .custom-input { width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 12px 15px; color: var(--text-main); font-family: inherit; font-size: 1rem; transition: border-color 0.3s; margin-bottom: 5px; }
-        .custom-input:focus { outline: none; border-color: var(--primary); }
+        .custom-input { width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 14px 16px; color: var(--text-main); font-family: inherit; font-size: 1rem; transition: all 0.3s; margin-bottom: 5px; }
+        .custom-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.15); }
 
         .layout-controls { display: flex; gap: 10px; }
         .layout-controls input { width: 50%; text-align: center; }
 
         .btn-group { display: flex; flex-direction: column; gap: 10px; }
-        .btn-row { display: flex; gap: 10px; width: 100%; }
-        .btn-row .btn { flex: 1; padding: 12px 5px; font-size: 0.95rem; }
-        .btn { padding: 15px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.2s; font-size: 1rem; }
-        .btn-main { background: var(--primary); color: #0f172a; box-shadow: 0 4px 6px rgba(34, 211, 238, 0.2); }
-        .btn-main:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(34, 211, 238, 0.3); }
-        .btn-sub { background: #475569; color: white; }
-        .btn-sub:hover { background: #64748b; }
-        .btn-accent { background: var(--primary); color: var(--bg-dark); }
-        .btn-accent:hover { background: #a5f3fc; }
+        .btn-row { display: flex; gap: 8px; width: 100%; }
+        .btn-row .btn { flex: 1; padding: 12px 6px; font-size: 0.95rem; }
+        .btn { padding: 16px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); font-size: 1rem; }
+        .btn-sub { background: #475569; color: white; border: 1px solid transparent; }
+        .btn-sub:hover { background: #64748b; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
 
-        /* 공통 여백 및 디자인 통일 */
-        .highlight-section { padding: 20px; border-radius: 12px; margin: 0; box-shadow: 0 4px 15px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.1); }
+        .highlight-section { padding: 20px 22px; border-radius: 14px; margin: 0; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.08); transition: background 0.3s; }
         
-        /* 좌측 워크플로우 색상 */
-        .step1 { background: linear-gradient(145deg, var(--section-bg), rgba(16, 185, 129, 0.15)); border-color: rgba(16, 185, 129, 0.4); } 
-        .step2 { background: linear-gradient(145deg, var(--section-bg), rgba(14, 165, 233, 0.15)); border-color: rgba(14, 165, 233, 0.4); } 
-        .step3 { background: linear-gradient(145deg, var(--section-bg), rgba(244, 63, 94, 0.15)); border-color: rgba(244, 63, 94, 0.4); } 
+        .step1 { background: linear-gradient(145deg, var(--section-bg), rgba(16, 185, 129, 0.1)); border-color: rgba(16, 185, 129, 0.3); } 
+        .step2 { background: linear-gradient(145deg, var(--section-bg), rgba(14, 165, 233, 0.1)); border-color: rgba(14, 165, 233, 0.3); } 
+        .step3 { background: linear-gradient(145deg, var(--section-bg), rgba(244, 63, 94, 0.1)); border-color: rgba(244, 63, 94, 0.3); } 
 
-        /* 우측 환경 설정 메뉴 색상 (축소 디자인) */
-        .config-section { padding: 14px 18px; border-radius: 8px; margin-bottom: 15px; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.05); }
+        .config-section { padding: 16px 20px; border-radius: 12px; margin-bottom: 15px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); }
         .cfg-basic { border-left: 4px solid #8b5cf6; } 
         .cfg-data { border-left: 4px solid #f59e0b; }  
         .cfg-tips { border-left: 4px solid #3b82f6; }  
 
-        /* 좌측 워크플로우 타임라인 스타일 */
-        .workflow-header { margin-bottom: 25px; }
-        .workflow-header h2 { font-size: 1.25rem; margin: 0; color: #fff; letter-spacing: 0.5px; font-weight: 800; }
+        /* 💡 타이포그래피 위계 질서 (Hierarchy) 재정립 */
+        .workflow-header, .config-divider { margin-bottom: 25px; }
+        .workflow-header h2, .config-title { font-size: 1.45rem; margin: 0; color: #fff; letter-spacing: 0.5px; font-weight: 800; display: flex; align-items: center; }
+        .config-divider { border-top: none; margin-top: 0; padding-top: 0; }
 
         .timeline-wrapper { display: flex; flex-direction: column; gap: 0; }
-        .timeline-item { display: flex; align-items: stretch; gap: 15px; }
-        .timeline-left { display: flex; flex-direction: column; align-items: center; width: 32px; flex-shrink: 0; }
-        .timeline-number { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; color: white; flex-shrink: 0; z-index: 2; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        .timeline-line { width: 2px; flex-grow: 1; background: rgba(255,255,255,0.15); margin: 6px 0; border-radius: 2px; }
-        .timeline-right { flex-grow: 1; padding-bottom: 20px; min-width: 0; }
+        .timeline-item { display: flex; align-items: stretch; gap: 18px; }
+        .timeline-left { display: flex; flex-direction: column; align-items: center; width: 34px; flex-shrink: 0; }
+        .timeline-number { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.15rem; color: white; flex-shrink: 0; z-index: 2; box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
+        .timeline-line { width: 2px; flex-grow: 1; background: rgba(255,255,255,0.15); margin: 8px 0; border-radius: 2px; }
+        .timeline-right { flex-grow: 1; padding-bottom: 25px; min-width: 0; }
 
-        .num-1 { background: #10b981; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
-        .num-2 { background: #0ea5e9; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
-        .num-3 { background: #f43f5e; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
+        .num-1 { background: #10b981; }
+        .num-2 { background: #0ea5e9; }
+        .num-3 { background: #f43f5e; }
 
         .accordion-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; transition: opacity 0.2s; }
         .accordion-header:hover { opacity: 0.7; }
+        .accordion-header h2 { font-size: 1.15rem; font-weight: 700; margin: 0; } /* 스텝 타이틀 크기 통일 */
         .accordion-icon { font-size: 0.9rem; transition: transform 0.3s ease; color: inherit; }
         .accordion-section.open .accordion-icon { transform: rotate(180deg); }
 
-        .choice-group { display: flex; flex-direction: column; gap: 12px; margin-top: 15px; }
-        .step1-choice-btn { background: rgba(16, 185, 129, 0.08); border: 2px solid rgba(16, 185, 129, 0.3); border-radius: 12px; padding: 16px 20px; color: var(--text-main); font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); display: flex; align-items: center; justify-content: flex-start; width: 100%; box-sizing: border-box; letter-spacing: 0.5px; }
-        .step1-choice-btn:hover { background: rgba(16, 185, 129, 0.2); border-color: #10b981; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(16, 185, 129, 0.25); }
+        .choice-group { display: flex; flex-direction: column; gap: 12px; margin-top: 18px; }
+        .step1-choice-btn { background: rgba(16, 185, 129, 0.05); border: 2px solid rgba(16, 185, 129, 0.25); border-radius: 10px; padding: 18px 20px; color: var(--text-main); font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); display: flex; align-items: center; justify-content: flex-start; width: 100%; box-sizing: border-box; letter-spacing: 0.5px; }
+        .step1-choice-btn:hover { background: rgba(16, 185, 129, 0.15); border-color: #10b981; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(16, 185, 129, 0.2); }
         .step1-choice-btn:active { transform: translateY(1px); }
         
-        .btn-shuffle { background: linear-gradient(135deg, var(--primary), #0ea5e9); color: #0f172a; font-size: 1.15rem; font-weight: 800; padding: 18px; border: none; border-radius: 12px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 15px rgba(34, 211, 238, 0.3); width: 100%;}
-        .btn-shuffle:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 8px 25px rgba(34, 211, 238, 0.5); }
+        .btn-shuffle { 
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover)); 
+            color: #0f172a; 
+            font-size: 1.25rem; 
+            font-weight: 900; 
+            letter-spacing: 4px;
+            padding: 20px; 
+            border: none; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
+            box-shadow: 0 8px 25px rgba(34, 211, 238, 0.3); 
+            width: 100%;
+        }
+        .btn-shuffle:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 12px 30px rgba(34, 211, 238, 0.5); }
+        .btn-shuffle:active { transform: translateY(1px); }
         
-        .btn-step3 { background: linear-gradient(135deg, #f43f5e, #e11d48); color: white; font-size: 1.05rem; font-weight: 800; padding: 15px; border: none; border-radius: 12px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 15px rgba(244, 63, 94, 0.2); display: flex; align-items: center; justify-content: center; flex: 1;}
-        .btn-step3:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 8px 25px rgba(244, 63, 94, 0.4); }
+        .btn-step3 { background: linear-gradient(135deg, #f43f5e, #e11d48); color: white; font-size: 1rem; font-weight: 800; padding: 15px; border: none; border-radius: 10px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 15px rgba(244, 63, 94, 0.2); display: flex; align-items: center; justify-content: center; flex: 1;}
+        .btn-step3:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(244, 63, 94, 0.35); }
 
-        .custom-message-input { width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 15px; color: var(--text-main); font-family: inherit; font-size: 0.95rem; resize: none; height: 60px; line-height: 1.4; transition: border-color 0.3s; }
-        .custom-message-input:focus { outline: none; border-color: #f43f5e; }
+        .custom-message-input { width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 16px; color: var(--text-main); font-family: inherit; font-size: 0.95rem; resize: none; height: 70px; line-height: 1.5; transition: border-color 0.3s; }
+        .custom-message-input:focus { outline: none; border-color: #f43f5e; box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.15); }
         
-        .checkbox-label { display: flex; align-items: center; gap: 12px; margin: 10px 0; cursor: pointer; background: rgba(0,0,0,0.15); padding: 12px 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); transition: all 0.2s; }
-        .checkbox-label:hover { background: rgba(0,0,0,0.25); border-color: rgba(255,255,255,0.2); }
+        .checkbox-label { display: flex; align-items: center; gap: 12px; margin: 10px 0; cursor: pointer; background: rgba(0,0,0,0.2); padding: 14px 16px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); transition: all 0.2s; }
+        .checkbox-label:hover { background: rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.1); }
         
         input[type="checkbox"] { appearance: none; -webkit-appearance: none; width: 22px; height: 22px; min-width: 22px; border: 2px solid var(--text-dim); border-radius: 6px; background-color: rgba(15, 23, 42, 0.5); cursor: pointer; position: relative; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); margin: 0; }
         input[type="checkbox"]:hover { border-color: var(--primary); box-shadow: 0 0 8px rgba(34, 211, 238, 0.3); }
@@ -132,167 +140,133 @@
         #hidePhotoCheck:checked { background-color: var(--pinned-color); border-color: var(--pinned-color); box-shadow: 0 0 10px rgba(244, 63, 94, 0.4); }
         #hidePhotoCheck:checked::after { border-color: #fff; }
         
-        /* 💡 팁 컨텐츠 텍스트 디자인 (흐름에 맞게 정비) */
-        .usage-tips ul { list-style: none; padding: 0; margin: 0; word-break: keep-all; font-size: 0.85rem; color: #cbd5e1; line-height: 1.6; }
-        .usage-tips li { margin-bottom: 12px; padding-left: 16px; position: relative; }
+        /* 💡 팁 텍스트 디자인 */
+        .usage-tips ul { list-style: none; padding: 0; margin: 0; word-break: keep-all; font-size: 0.85rem; color: var(--text-dim); line-height: 1.6; }
+        .usage-tips li { margin-bottom: 14px; padding-left: 18px; position: relative; }
         .usage-tips li:last-child { margin-bottom: 0; }
-        .usage-tips li::before { content: "▪"; position: absolute; left: 0; top: 1px; color: #3b82f6; font-size: 0.8rem; }
-        .usage-tips li .tip-title { color: var(--primary); font-weight: 700; margin-right: 2px; }
+        .usage-tips li::before { content: "▪"; position: absolute; left: 0; top: 1px; color: var(--text-main); font-size: 0.8rem; opacity: 0.5; }
+        .usage-tips li .tip-title { font-weight: 800; margin-right: 4px; letter-spacing: 0.5px; }
         
-        .credit-btn { background: transparent; border: none; color: rgba(255, 255, 255, 0.3); font-size: 0.85rem; text-align: left; width: 100%; padding: 5px 10px; margin-top: auto; padding-top: 15px; cursor: pointer; transition: color 0.3s; font-family: inherit; letter-spacing: 1px; box-sizing: border-box; font-weight: 500; }
-        .credit-btn:hover { color: var(--primary); }
+        .credit-btn { background: transparent; border: none; color: rgba(255, 255, 255, 0.2); font-size: 0.85rem; text-align: center; width: 100%; padding: 10px; margin-top: auto; padding-top: 20px; cursor: pointer; transition: color 0.3s; font-family: inherit; letter-spacing: 1px; font-weight: 500; }
+        .credit-btn:hover { color: var(--text-main); }
 
-        .main-content { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
-        #captureArea { width: 100%; max-width: 1200px; padding: 30px 30px 40px 30px; display: flex; flex-direction: column; align-items: center; background: var(--bg-dark); min-height: 100%; box-sizing: border-box; position: relative; }
-        .header-group { text-align: center; margin-bottom: 25px; flex-shrink: 0; }
-        #mainTitle { font-size: 3.5rem; margin: 0 0 5px 0; color: white; letter-spacing: 3px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; }
-        .class-info-text { font-size: 0.55em; color: var(--primary); font-weight: 700; margin-left: 15px; letter-spacing: 1px; white-space: nowrap; }
-        .podium { width: 350px; padding: 15px; border: 3px solid var(--primary); color: var(--primary); border-radius: 8px; text-align: center; font-weight: 800; font-size: 1.5rem; margin: 0 auto 30px auto; letter-spacing: 8px; background: rgba(34, 211, 238, 0.05); flex-shrink: 0; }
+        .main-content { flex-grow: 1; padding: 25px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
+        #captureArea { width: 100%; max-width: 1200px; padding: 40px; display: flex; flex-direction: column; align-items: center; background: var(--bg-dark); min-height: 100%; box-sizing: border-box; position: relative; }
+        
+        .header-group { text-align: center; margin-bottom: 30px; flex-shrink: 0; }
+        #mainAppTitle { font-size: 3.8rem; margin: 0 0 5px 0; color: white; letter-spacing: 2px; font-weight: 900; line-height: 1.1; }
+        #mainAppTitle span { color: var(--primary); }
+        #subClassInfo { font-size: 1.15rem; color: var(--text-dim); font-weight: 600; letter-spacing: 1px; }
+
+        .podium { width: 350px; padding: 16px; border: 2px solid var(--primary); color: var(--primary); border-radius: 12px; text-align: center; font-weight: 800; font-size: 1.4rem; margin: 0 auto 35px auto; letter-spacing: 8px; background: rgba(34, 211, 238, 0.05); flex-shrink: 0; box-shadow: 0 4px 15px rgba(34, 211, 238, 0.1); }
 
         #emptyState { display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; width: 100%; margin-bottom: 30px; }
-        .welcome-text { margin-top: 30px; font-size: 1.2rem; color: var(--text-dim); text-align: center; line-height: 1.6; letter-spacing: 1px; font-weight: 600; }
+        .welcome-text { margin-top: 30px; font-size: 1.25rem; color: var(--text-dim); text-align: center; line-height: 1.6; letter-spacing: 1px; font-weight: 600; }
         .welcome-text span { color: var(--primary); font-weight: 800; }
         
         #seatGridWrapper { position: relative; width: 100%; flex-grow: 1; display: flex; flex-direction: column; }
         
         .seating-grid { display: grid; grid-template-columns: var(--grid-template, repeat(var(--grid-cols), 1fr)); grid-template-rows: repeat(var(--grid-rows), minmax(0, 1fr)); gap: var(--gap-size); width: 100%; flex-grow: 1; align-content: stretch; position: relative; z-index: 1; }
         
-        .seat-box { position: relative; background: var(--card-bg); border-radius: 12px; display: flex; flex-direction: row-reverse; align-items: center; justify-content: space-between; padding: 0; box-shadow: 0 4px 8px rgba(0,0,0,0.3); cursor: grab; transition: transform 0.6s, opacity 0.5s, filter 0.5s; overflow: visible; border: 3px solid transparent; }
-        .seat-box:active { cursor: grabbing; }
-        .seat-box.is-pinned { border-color: var(--pinned-color); box-shadow: 0 0 15px rgba(244, 63, 94, 0.4); }
+        .seat-box { position: relative; background: var(--card-bg); border-radius: 14px; display: flex; flex-direction: row-reverse; align-items: center; justify-content: space-between; padding: 0; box-shadow: 0 6px 12px rgba(0,0,0,0.2); cursor: grab; transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s, filter 0.5s; overflow: visible; border: 3px solid transparent; }
+        .seat-box:active { cursor: grabbing; transform: scale(0.95); }
+        .seat-box.is-pinned { border-color: var(--pinned-color); box-shadow: 0 0 15px rgba(244, 63, 94, 0.3); }
         .seat-box.is-pairing { border-color: var(--pair-color); border-style: dashed; }
         .seat-box.is-paired { border-color: var(--pair-color); }
+        .seat-box.is-nearing { border-color: var(--near-color); border-style: dashed; }
         .seat-box.is-avoiding { border-color: var(--avoid-color); border-style: dashed; }
+        .seat-box.is-fronting { border-color: var(--front-color); border-style: dashed; }
         
-        .seat-box-content { position: relative; width: 100%; height: 100%; display: flex; flex-direction: row-reverse; align-items: center; justify-content: space-between; border-radius: 10px; overflow: hidden; background: var(--card-bg); }
-        .seat-box.empty-seat .seat-box-content { background: rgba(255,255,255,0.02); border: 2px dashed rgba(255,255,255,0.1); box-shadow: none; cursor: grab; flex-direction: column; justify-content: center; padding: 20px; box-sizing: border-box; }
-        .seat-box.empty-seat { background: transparent; box-shadow: none; }
+        .seat-box-content { position: relative; width: 100%; height: 100%; display: flex; flex-direction: row-reverse; align-items: center; justify-content: space-between; border-radius: 11px; overflow: hidden; background: var(--card-bg); }
+        .seat-box.empty-seat .seat-box-content { background: rgba(255,255,255,0.03); border: 2px dashed rgba(255,255,255,0.15); box-shadow: none; cursor: grab; flex-direction: column; justify-content: center; padding: 20px; box-sizing: border-box; transition: background 0.2s; }
+        .seat-box.empty-seat .seat-box-content:hover { background: rgba(255,255,255,0.06); }
+        .seat-box.empty-seat { background: transparent; box-shadow: none; border: none; }
         
         .seat-box.empty-seat.excluded-seat .seat-box-content { background: rgba(244, 63, 94, 0.05); border: 2px dashed rgba(244, 63, 94, 0.4); }
-        .empty-seat-text { text-align: center; line-height: 1.4; }
-        .btn-exclude { display: inline-block; margin-top: 8px; padding: 6px 10px; background: rgba(244, 63, 94, 0.15); color: #fda4af; border-radius: 6px; font-size: 0.8rem; cursor: pointer; transition: 0.2s; font-weight: 700; border: 1px solid rgba(244, 63, 94, 0.3); }
+        .empty-seat-text { text-align: center; line-height: 1.5; font-size: 0.95rem; color: var(--text-dim); }
+        .btn-exclude { display: inline-block; margin-top: 10px; padding: 6px 12px; background: rgba(244, 63, 94, 0.15); color: #fda4af; border-radius: 8px; font-size: 0.8rem; cursor: pointer; transition: 0.2s; font-weight: 700; border: 1px solid rgba(244, 63, 94, 0.3); }
         .btn-exclude:hover { background: rgba(244, 63, 94, 0.4); color: #fff; }
-        .btn-include { display: inline-block; margin-top: 8px; padding: 6px 10px; background: rgba(16, 185, 129, 0.15); color: #6ee7b7; border-radius: 6px; font-size: 0.8rem; cursor: pointer; transition: 0.2s; font-weight: 700; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .btn-include { display: inline-block; margin-top: 10px; padding: 6px 12px; background: rgba(16, 185, 129, 0.15); color: #6ee7b7; border-radius: 8px; font-size: 0.8rem; cursor: pointer; transition: 0.2s; font-weight: 700; border: 1px solid rgba(16, 185, 129, 0.3); }
         .btn-include:hover { background: rgba(16, 185, 129, 0.4); color: #fff; }
 
-        #gridColumnToggles {
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 0; 
-            display: grid; 
-            pointer-events: none; 
-            z-index: 50; 
-        }
-        
-        .aisle-toggle {
-            width: 32px;
-            height: 32px;
-            background: var(--card-bg);
-            border: 2.5px solid var(--primary);
-            color: var(--primary);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.85rem;
-            font-weight: 900;
-            cursor: pointer;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            letter-spacing: -1.5px;
-            user-select: none;
-            pointer-events: auto; 
-            margin-top: -16px; 
-        }
-        .aisle-toggle.is-active {
-            background: var(--primary);
-            color: var(--bg-dark);
-        }
-        .aisle-toggle:hover {
-            transform: scale(1.15) !important; 
-            box-shadow: 0 6px 15px rgba(34, 211, 238, 0.4);
-        }
+        #gridColumnToggles { position: absolute; top: 0; left: 0; width: 100%; height: 0; display: grid; pointer-events: none; z-index: 50; }
+        .aisle-toggle { width: 32px; height: 32px; background: var(--card-bg); border: 2px solid var(--primary); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 900; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 10px rgba(0,0,0,0.5); letter-spacing: -1.5px; user-select: none; pointer-events: auto; margin-top: -16px; }
+        .aisle-toggle.is-active { background: var(--primary); color: var(--bg-dark); }
+        .aisle-toggle:hover { transform: scale(1.15) !important; box-shadow: 0 6px 15px rgba(34, 211, 238, 0.4); }
         @media print { #gridColumnToggles { display: none !important; } }
 
-        .badge-container { position: absolute; bottom: 8px; left: 8px; display: flex; gap: 4px; flex-wrap: wrap; z-index: 10; pointer-events: auto; max-width: 90%; }
-        .pair-label, .avoid-label { font-size: 0.75rem; padding: 3px 6px; border-radius: 6px; font-weight: 900; box-shadow: 0 2px 4px rgba(0,0,0,0.3); cursor: pointer; transition: transform 0.1s; }
-        .pair-label:hover, .avoid-label:hover { transform: scale(1.1); }
+        .badge-container { position: absolute; bottom: 8px; left: 8px; display: flex; gap: 5px; flex-wrap: wrap; z-index: 10; pointer-events: auto; max-width: 90%; }
+        .pair-label, .avoid-label, .front-label, .near-label { font-size: 0.75rem; padding: 4px 8px; border-radius: 12px; font-weight: 800; box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: pointer; transition: transform 0.15s; letter-spacing: 0.5px; }
+        .pair-label:hover, .avoid-label:hover, .front-label:hover, .near-label:hover { transform: scale(1.05); }
         
         .student-img { width: 60%; height: 100%; min-height: 0; object-fit: cover; object-position: top center; background: #2d3748; pointer-events: none; align-self: flex-start; }
-        
-        .student-name { 
-            width: 40%; height: 100%; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            text-align: center; font-weight: 800; padding: 4px; box-sizing: border-box; pointer-events: none; 
-            font-size: min(var(--name-font), 1.8vw);
-        }
-        .seat-number, .seat-name { 
-            display: block; width: 100%; max-width: 100%; 
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.15;
-        }
-        .seat-number { font-size: 0.7em; opacity: 0.85; margin-bottom: 2px; }
-        .seat-name { font-size: 1em; }
+        .student-name { width: 40%; height: 100%; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; font-weight: 800; padding: 4px; box-sizing: border-box; pointer-events: none; font-size: min(var(--name-font), 1.8vw); }
+        .seat-number, .seat-name { display: block; width: 100%; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
+        .seat-number { font-size: 0.75em; opacity: 0.8; margin-bottom: 2px; }
+        .seat-name { font-size: 1em; letter-spacing: 0.5px; }
         
         .seating-grid.hide-photos .student-img { display: none !important; }
         .seating-grid.hide-photos .seat-box-content { flex-direction: column; justify-content: center; align-items: center; padding: 15px; }
-        .seating-grid.hide-photos .student-name { 
-            width: 100% !important; height: 100% !important;
-            font-size: var(--name-font) !important; 
-            color: var(--primary); justify-content: center !important; gap: 4px !important;
-            white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;
-        }
-        .seating-grid.hide-photos .seat-number { font-size: 0.55em !important; color: var(--text-dim) !important; margin: 0 !important; opacity: 1 !important; line-height: 1 !important; }
-        .seating-grid.hide-photos .seat-name { font-size: 1em !important; margin: 0 !important; line-height: 1 !important; }
+        .seating-grid.hide-photos .student-name { width: 100% !important; height: 100% !important; font-size: var(--name-font) !important; color: var(--primary); justify-content: center !important; gap: 4px !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
+        .seating-grid.hide-photos .seat-number { font-size: 0.6em !important; color: var(--text-dim) !important; margin: 0 !important; opacity: 1 !important; line-height: 1 !important; }
+        .seating-grid.hide-photos .seat-name { font-size: 1.1em !important; margin: 0 !important; line-height: 1 !important; }
 
         .edit-name-input { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; padding: 12px 5px; font-size: 1.2rem; font-weight: 700; text-align: center; border: 3px solid var(--primary); border-radius: 8px; background: var(--bg-dark); color: white; z-index: 20; box-shadow: 0 10px 25px rgba(0,0,0,0.6); outline: none; font-family: inherit; }
-        .pin-btn-container { position: absolute; top: 10px; right: 10px; cursor: pointer; z-index: 10; width: var(--pin-size); height: var(--pin-size); display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); border-radius: 50%; transition: 0.2s; }
-        .pin-btn-container:hover { background: rgba(0,0,0,0.9); transform: scale(1.1); }
-        .pin-icon { font-size: var(--pin-icon); color: white; }
+        
+        /* 💡 압정 이모지 복구 및 배경 블러 고급화 */
+        .pin-btn-container { position: absolute; top: 8px; right: 8px; cursor: pointer; z-index: 10; width: var(--pin-size); height: var(--pin-size); display: flex; align-items: center; justify-content: center; background: rgba(15, 23, 42, 0.6); border-radius: 50%; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.1); }
+        .pin-btn-container.pinned-active { background: var(--pinned-color); border-color: var(--pinned-color); box-shadow: 0 0 15px rgba(244, 63, 94, 0.4); }
+        .pin-btn-container:hover { background: rgba(15, 23, 42, 0.9); transform: scale(1.1); }
+        .pin-icon { font-size: 1rem; line-height: 1; padding-bottom: 2px; }
 
-        .message-display { width: 100%; text-align: left; margin-top: 20px; font-size: 1.1rem; font-weight: 700; flex-shrink: 0; color: #f43f5e; white-space: pre-line; letter-spacing: 1px; line-height: 1.4; box-sizing: border-box; padding: 12px 20px; border: 2px dashed rgba(244, 63, 94, 0.5); border-radius: 12px; background: rgba(244, 63, 94, 0.05); display: none; }
+        .message-display { width: 100%; text-align: left; margin-top: 20px; font-size: 1.1rem; font-weight: 700; flex-shrink: 0; color: #f43f5e; white-space: pre-line; letter-spacing: 1px; line-height: 1.4; box-sizing: border-box; padding: 16px 20px; border: 2px dashed rgba(244, 63, 94, 0.4); border-radius: 12px; background: rgba(244, 63, 94, 0.05); display: none; }
         .school-logo-container { margin-top: auto; padding-top: 15px; width: 100%; display: flex; justify-content: center; align-items: center; flex-shrink: 0; }
         .school-logo { max-width: 250px; height: auto; background-color: #ffffff; padding: 8px 20px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4); opacity: 0.95; }
         .seat-box.hidden-state { opacity: 0; transform: scale(0.4) translateY(60px); filter: blur(8px); }
         
         #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(5px); }
-        .modal-body { background: var(--card-bg); padding: 40px; border-radius: 16px; width: 360px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-        .modal-body h3 { font-size: 1.4rem; }
+        .modal-body { background: var(--card-bg); padding: 40px; border-radius: 20px; width: 360px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.5); }
+        .modal-body h3 { font-size: 1.4rem; font-weight: 800; letter-spacing: 0.5px; }
         
-        #customToast { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--card-bg); color: var(--primary); padding: 18px 40px; border-radius: 30px; border: 1px solid rgba(34, 211, 238, 0.3); box-shadow: 0 15px 30px rgba(0,0,0,0.6); font-size: 1.2rem; font-weight: 700; opacity: 0; transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease; z-index: 3000; pointer-events: none; letter-spacing: 1px; text-align: center; white-space: pre-line; }
+        #customToast { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--card-bg); color: var(--primary); padding: 18px 40px; border-radius: 30px; border: 1px solid rgba(34, 211, 238, 0.3); box-shadow: 0 15px 30px rgba(0,0,0,0.6); font-size: 1.15rem; font-weight: 700; opacity: 0; transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease; z-index: 3000; pointer-events: none; letter-spacing: 0.5px; text-align: center; white-space: pre-line; }
         #customToast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
-        #countdownOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(22, 28, 36, 0.96); z-index: 9999; display: none; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
-        .countdown-ring { position: relative; width: 450px; height: 450px; border: 8px solid rgba(34, 211, 238, 0.2); border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: inset 0 0 40px rgba(34, 211, 238, 0.1), 0 0 50px rgba(0,0,0,0.5); }
-        .countdown-ring::before { content: ''; position: absolute; width: 410px; height: 410px; border: 2px dashed rgba(34, 211, 238, 0.4); border-radius: 50%; }
-        .countdown-line-h { position: absolute; width: 550px; height: 2px; background: rgba(34, 211, 238, 0.15); pointer-events: none; }
-        .countdown-line-v { position: absolute; width: 2px; height: 550px; background: rgba(34, 211, 238, 0.15); pointer-events: none; }
-        .sweep-hand { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: conic-gradient(rgba(34, 211, 238, 0.25) 0deg, transparent 90deg, transparent 360deg); border-radius: 50%; pointer-events: none; transform: rotate(-90deg); }
+        #countdownOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.96); z-index: 9999; display: none; justify-content: center; align-items: center; backdrop-filter: blur(8px); }
+        .countdown-ring { position: relative; width: 450px; height: 450px; border: 8px solid rgba(34, 211, 238, 0.1); border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: inset 0 0 40px rgba(34, 211, 238, 0.05), 0 0 50px rgba(0,0,0,0.5); }
+        .countdown-ring::before { content: ''; position: absolute; width: 410px; height: 410px; border: 2px dashed rgba(34, 211, 238, 0.3); border-radius: 50%; }
+        .countdown-line-h { position: absolute; width: 550px; height: 2px; background: rgba(34, 211, 238, 0.1); pointer-events: none; }
+        .countdown-line-v { position: absolute; width: 2px; height: 550px; background: rgba(34, 211, 238, 0.1); pointer-events: none; }
+        .sweep-hand { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: conic-gradient(rgba(34, 211, 238, 0.2) 0deg, transparent 90deg, transparent 360deg); border-radius: 50%; pointer-events: none; transform: rotate(-90deg); }
         .sweep-hand.active { animation: sweepTransform 1s linear infinite; }
         @keyframes sweepTransform { 0% { transform: rotate(-90deg); } 100% { transform: rotate(270deg); } }
-        #countdownText { font-size: 14rem; font-weight: 800; color: var(--primary); text-shadow: 0 0 40px rgba(34, 211, 238, 0.6); z-index: 10; font-family: 'Courier New', Courier, monospace, sans-serif; opacity: 0; transform: scale(0.6); }
+        #countdownText { font-size: 14rem; font-weight: 900; color: var(--primary); text-shadow: 0 0 40px rgba(34, 211, 238, 0.6); z-index: 10; font-family: 'Courier New', Courier, monospace, sans-serif; opacity: 0; transform: scale(0.6); letter-spacing: -5px; }
         @keyframes countAnim { 0% { transform: scale(0.5); opacity: 0; filter: blur(5px); } 15% { transform: scale(1.05); opacity: 1; filter: blur(0); } 85% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.3); opacity: 0; filter: blur(3px); } }
 
         @media screen {
             body.fit-screen .main-content { padding: 0; overflow: hidden; }
             body.fit-screen #captureArea { height: 100vh; padding: 2vh 2vw; box-sizing: border-box; display: flex; flex-direction: column; max-width: none; }
             body.fit-screen .header-group { margin-bottom: 1vh; }
-            body.fit-screen #mainTitle { font-size: 4vh; margin: 0; }
+            body.fit-screen #mainAppTitle { font-size: 4vh; margin: 0; }
+            body.fit-screen #subClassInfo { font-size: 1.5vh; }
             body.fit-screen .podium { padding: 1vh; font-size: 2.5vh; margin: 1vh auto 2vh auto; width: 300px; }
             body.fit-screen .seating-grid { flex: 1 1 0; min-height: 0; gap: 1.5vh; }
             body.fit-screen .seat-box { padding: 0; box-sizing: border-box; }
             body.fit-screen .message-display { font-size: min(1.1rem, 2vh); padding: 1vh 2vw; margin-top: 1vh; }
         }
 
-        /* 🖨️ [인쇄용 CSS] 완벽 격리 해결판 */
+        /* 🖨️ [인쇄용 CSS] 브랜딩 완벽 연동 */
         @media print {
             html, body { width: 100% !important; height: 100% !important; margin: 0 !important; padding: 0 !important; background: white !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; overflow: hidden !important; }
             .sidebar-left, .sidebar-right, #modal, .pin-btn-container, #emptyState, .credit-btn, #customToast, #countdownOverlay, .btn-exclude, .btn-include, #gridColumnToggles { display: none !important; }
             .main-content { padding: 0 !important; display: flex !important; width: 100% !important; height: 100% !important; overflow: hidden !important; }
             #captureArea { width: 100% !important; height: 100% !important; max-width: none !important; padding: 4mm !important; background: white !important; box-sizing: border-box !important; display: flex !important; flex-direction: column !important; }
             .header-group { flex-shrink: 0 !important; margin-bottom: 1mm !important; }
-            #mainTitle { font-size: 24pt !important; color: black !important; margin-bottom: 1mm !important; letter-spacing: 1px !important; }
-            .class-info-text { color: #333 !important; }
+            
+            /* 💡 인쇄 시 타이틀 디자인 세련되게 연동 */
+            #mainAppTitle { display: block !important; font-size: 32pt !important; color: #111 !important; font-weight: 900 !important; text-align: center !important; margin: 0 0 1mm 0 !important; letter-spacing: 2px !important; }
+            #mainAppTitle span { color: #0284c7 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            #subClassInfo { font-size: 16pt !important; color: #444 !important; font-weight: 800 !important; margin-bottom: 3mm !important; text-align: center !important; letter-spacing: 1px !important; }
+            
             .podium { flex-shrink: 0 !important; border: 1.5px solid black !important; color: black !important; padding: 2mm !important; font-size: 13pt !important; margin: 3mm auto !important; width: 50% !important; background: transparent !important; letter-spacing: 5px !important; }
             .message-display { flex-shrink: 0 !important; margin: 2mm 0 !important; font-size: 12pt !important; color: black !important; font-weight: 800 !important; text-align: left !important; padding: 2mm 4mm !important; border: 1.5px solid black !important; border-radius: 8px !important; background: white !important; }
             .school-logo-container { flex-shrink: 0 !important; margin-top: auto !important; padding: 2mm 0 !important; display: flex !important; }
@@ -306,37 +280,17 @@
             .seat-box.empty-seat .seat-box-content { border: 1.5px dashed #ccc !important; }
             .empty-seat-text { display: none !important; }
             
-            .student-img { 
-                display: block !important; width: 100% !important; 
-                height: auto !important; flex-grow: 1 !important; flex-shrink: 1 !important;
-                object-fit: cover !important; object-position: top center !important; background: transparent !important; border-radius: 4px !important; margin: 0 0 1mm 0 !important; 
-            }
-            .student-name { 
-                display: flex !important; flex-direction: column !important; justify-content: center !important; align-items: center !important; 
-                width: 100% !important; height: auto !important; flex-basis: auto !important; flex-grow: 0 !important; flex-shrink: 0 !important;
-                font-size: var(--print-name-font) !important; color: black !important; margin: 0 !important; padding: 0 !important; overflow: hidden !important; 
-            }
+            .student-img { display: block !important; width: 100% !important; height: auto !important; flex-grow: 1 !important; flex-shrink: 1 !important; object-fit: cover !important; object-position: top center !important; background: transparent !important; border-radius: 4px !important; margin: 0 0 1mm 0 !important; }
+            .student-name { display: flex !important; flex-direction: column !important; justify-content: center !important; align-items: center !important; width: 100% !important; height: auto !important; flex-basis: auto !important; flex-grow: 0 !important; flex-shrink: 0 !important; font-size: var(--print-name-font) !important; color: black !important; margin: 0 !important; padding: 0 !important; overflow: hidden !important; }
             
             .seat-number { display: block !important; font-size: 8pt !important; color: #444 !important; margin-bottom: 1mm !important; line-height: 1 !important; }
             .seat-name { display: block !important; font-size: 11pt !important; font-weight: bold !important; line-height: 1.1 !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; max-width: 100% !important; }
             
             .seating-grid.hide-photos .seat-box-content { justify-content: center !important; padding: 3mm !important; }
             .seating-grid.hide-photos .student-img { display: none !important; }
-            .seating-grid.hide-photos .student-name { 
-                height: 100% !important; flex-basis: 100% !important;
-                font-size: var(--print-name-font) !important; 
-                gap: 2mm !important;
-            }
-            .seating-grid.hide-photos .seat-number { 
-                font-size: 0.55em !important; 
-                margin-bottom: 0 !important; 
-            }
-            .seating-grid.hide-photos .seat-name { 
-                font-size: 1em !important;
-                white-space: nowrap !important; 
-                overflow: hidden !important; 
-                text-overflow: ellipsis !important; 
-            }
+            .seating-grid.hide-photos .student-name { height: 100% !important; flex-basis: 100% !important; font-size: var(--print-name-font) !important; gap: 2mm !important; }
+            .seating-grid.hide-photos .seat-number { font-size: 0.55em !important; margin-bottom: 0 !important; }
+            .seating-grid.hide-photos .seat-name { font-size: 1em !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
             
             .badge-container { display: none !important; }
         }
@@ -347,7 +301,7 @@
 
     <aside class="sidebar-left">
         <div class="workflow-header">
-            <h2>자리배치 3단계 워크플로우</h2>
+            <h2 style="font-size: 1.4rem;">자리배치 3단계 워크플로우</h2>
         </div>
 
         <div class="timeline-wrapper">
@@ -359,7 +313,7 @@
                 <div class="timeline-right">
                     <section class="highlight-section step1 accordion-section closed">
                         <div class="accordion-header" onclick="toggleAccordion(this)">
-                            <h2 style="margin: 0; color: #10b981; font-size: 1.15rem;">Step 1</h2>
+                            <h2 style="margin: 0; color: #10b981; font-size: 1.15rem;">STEP 1</h2>
                             <span class="accordion-icon" style="color: #10b981;">▼</span>
                         </div>
                         <div class="accordion-content" style="display: none; margin-top: 15px;">
@@ -392,23 +346,31 @@
                 <div class="timeline-right">
                     <section class="highlight-section step2 accordion-section closed">
                         <div class="accordion-header" onclick="toggleAccordion(this)">
-                            <h2 style="margin: 0; color: var(--primary); font-size: 1.15rem;">Step 2</h2>
+                            <h2 style="margin: 0; color: var(--primary); font-size: 1.15rem;">STEP 2</h2>
                             <span class="accordion-icon" style="color: var(--primary);">▼</span>
                         </div>
                         
                         <div class="accordion-content" style="display: none; margin-top: 15px;">
-                            <button type="button" class="btn btn-shuffle" style="margin-bottom: 12px; padding: 14px; font-size: 1.05rem;" onclick="startCountdownAndShuffle(event)">배치</button>
+                            <button type="button" class="btn btn-shuffle" style="margin-bottom: 22px; padding: 22px; font-size: 1.35rem; letter-spacing: 5px; font-weight: 900; box-shadow: 0 6px 20px rgba(34, 211, 238, 0.4);" onclick="startCountdownAndShuffle(event)">배 치 하 기</button>
 
-                            <div class="btn-group" style="margin-bottom: 12px; gap: 8px;">
-                                <button type="button" id="pairModeBtn" class="btn btn-sub" style="font-size: 0.9rem; padding: 10px; border: 1px solid var(--pair-color); color: var(--pair-color); background: transparent;" onclick="togglePairMode()">짝꿍 설정 (OFF)</button>
-                                <button type="button" id="avoidModeBtn" class="btn btn-sub" style="font-size: 0.9rem; padding: 10px; border: 1px solid var(--avoid-color); color: var(--avoid-color); background: transparent;" onclick="toggleAvoidMode()">기피 설정 (OFF)</button>
-                                <button type="button" class="btn btn-sub" style="font-size: 0.9rem; padding: 10px;" onclick="resetPins()">모든 설정 해제</button>
-                                <button type="button" id="fitScreenBtn" class="btn btn-sub" style="font-size: 0.9rem; padding: 10px; background: transparent; color: var(--primary); border: 1px solid var(--primary);" onclick="toggleFitScreen()">꽉찬화면 실행</button>
+                            <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 8px; font-weight: 800; padding-left: 4px; letter-spacing: 0.5px;">사전 조건 설정</div>
+                            <div class="btn-row" style="margin-bottom: 15px; gap: 6px;">
+                                <button type="button" id="frontModeBtn" class="btn btn-sub" style="font-size: 0.85rem; padding: 12px 2px; border: 1px solid var(--front-color); color: var(--front-color); background: transparent; font-weight:800;" onclick="toggleFrontMode()">앞줄 (OFF)</button>
+                                <button type="button" id="pairModeBtn" class="btn btn-sub" style="font-size: 0.85rem; padding: 12px 2px; border: 1px solid var(--pair-color); color: var(--pair-color); background: transparent; font-weight:800;" onclick="togglePairMode()">짝꿍 (OFF)</button>
+                                <button type="button" id="nearModeBtn" class="btn btn-sub" style="font-size: 0.85rem; padding: 12px 2px; border: 1px solid var(--near-color); color: var(--near-color); background: transparent; font-weight:800;" onclick="toggleNearMode()">인접 (OFF)</button>
+                                <button type="button" id="avoidModeBtn" class="btn btn-sub" style="font-size: 0.85rem; padding: 12px 2px; border: 1px solid var(--avoid-color); color: var(--avoid-color); background: transparent; font-weight:800;" onclick="toggleAvoidMode()">기피 (OFF)</button>
                             </div>
 
-                            <label class="checkbox-label" style="margin: 0; background: rgba(0,0,0,0.25); border-radius: 8px; padding: 12px 15px;">
+                            <hr style="border: 0; border-top: 1px dashed rgba(255,255,255,0.15); margin: 18px 0;">
+
+                            <div class="btn-row" style="margin-bottom: 12px;">
+                                <button type="button" class="btn btn-sub" style="font-size: 0.9rem; padding: 12px; background: rgba(0,0,0,0.25);" onclick="resetPins()">초기화</button>
+                                <button type="button" id="fitScreenBtn" class="btn btn-sub" style="font-size: 0.9rem; padding: 12px; background: rgba(0,0,0,0.25);" onclick="toggleFitScreen()">전체화면</button>
+                            </div>
+
+                            <label class="checkbox-label" style="margin: 0; background: rgba(0,0,0,0.25); border-radius: 10px; padding: 14px 16px; border: none;">
                                 <input type="checkbox" id="skipAnimCheck">
-                                <span style="font-size: 0.85rem; color: #cbd5e1; font-weight: 500;">Quick shuffle ✔</span>
+                                <span style="font-size: 0.9rem; color: #cbd5e1; font-weight: 600;">빠른 배치</span>
                             </label>
                         </div>
                     </section>
@@ -422,22 +384,22 @@
                 <div class="timeline-right">
                     <section class="highlight-section step3 accordion-section closed">
                         <div class="accordion-header" onclick="toggleAccordion(this)">
-                            <h2 style="margin: 0; color: #f43f5e; font-size: 1.15rem;">Step 3</h2>
+                            <h2 style="margin: 0; color: #f43f5e; font-size: 1.15rem;">STEP 3</h2>
                             <span class="accordion-icon" style="color: #f43f5e;">▼</span>
                         </div>
                         <div class="accordion-content" style="display: none; margin-top: 15px;">
-                            <div style="font-size: 0.85rem; color: #f1f5f9; margin-bottom: 5px; font-weight: bold;">Message area</div>
-                            <textarea id="messageInput" class="custom-message-input" placeholder="출력물 하단 당부 말씀&#10;예) 허락 없는 자리 이동 금지" style="height: 50px;"></textarea>
+                            <div style="font-size: 0.9rem; color: #f1f5f9; margin-bottom: 8px; font-weight: 800; letter-spacing: 0.5px;">출력하단 메시지</div>
+                            <textarea id="messageInput" class="custom-message-input" placeholder="출력물 하단 당부 말씀&#10;예) 허락 없는 자리 이동 금지" style="height: 55px; border: none; background: rgba(0,0,0,0.25);"></textarea>
                             
-                            <label class="checkbox-label" style="margin: 10px 0; background: transparent; border: none; padding: 0;">
+                            <label class="checkbox-label" style="margin: 12px 0; background: transparent; border: none; padding: 0;">
                                 <input type="checkbox" id="hidePhotoCheck">
-                                <span style="font-size: 0.9rem;">Photo hiding</span>
+                                <span style="font-size: 0.95rem; font-weight: 600;">사진 숨기기</span>
                             </label>
                             
-                            <div style="font-size: 0.9rem; margin: 15px 0 8px 0; color: #f1f5f9; font-weight: bold;">Print choice</div>
+                            <div style="font-size: 0.9rem; margin: 18px 0 10px 0; color: #f1f5f9; font-weight: 800; letter-spacing: 0.5px;">출력 선택</div>
                             <div class="btn-row">
-                                <button type="button" class="btn-step3" style="padding: 10px; font-size: 0.9rem;" onclick="openModal('student')">학생용 출력</button>
-                                <button type="button" class="btn-step3" style="padding: 10px; font-size: 0.9rem; background: linear-gradient(135deg, #be123c, #9f1239);" onclick="openModal('teacher')">교사용 출력</button>
+                                <button type="button" class="btn-step3" style="padding: 12px; font-size: 0.95rem;" onclick="openModal('student')">학생용 출력</button>
+                                <button type="button" class="btn-step3" style="padding: 12px; font-size: 0.95rem; background: linear-gradient(135deg, #be123c, #9f1239);" onclick="openModal('teacher')">교사용 출력</button>
                             </div>
                         </div>
                     </section>
@@ -449,7 +411,8 @@
     <main class="main-content">
         <div id="captureArea">
             <div class="header-group">
-                <h1 id="mainTitle">좌석 배치도</h1>
+                <h1 id="mainAppTitle"><span style="color:var(--primary);">Class</span>Grid</h1>
+                <div id="subClassInfo">클래스그리드 좌석 배치도</div>
             </div>
             <div id="dynamicPodium" class="podium">교 탁</div>
             
@@ -457,8 +420,8 @@
                 <img src="캐릭터기본형.png" alt="캐릭터" class="welcome-character">
                 
                 <div id="welcomeActionGroup" style="display: flex; gap: 15px; margin-top: 35px; flex-wrap: wrap; justify-content: center;">
-                    <button type="button" class="btn btn-shuffle" style="width: auto; padding: 16px 30px; font-size: 1.15rem; border-radius: 30px;" onclick="startApp()">자리배치 시작하기</button>
-                    <button type="button" class="btn btn-sub" style="width: auto; padding: 16px 30px; font-size: 1.1rem; border-radius: 30px; border: 1px solid #10b981; color: #10b981; background: rgba(16, 185, 129, 0.1);" onclick="document.getElementById('backupInput').click()">이전 배치 불러오기</button>
+                    <button type="button" class="btn btn-shuffle" style="width: auto; padding: 16px 35px; font-size: 1.2rem; border-radius: 30px; letter-spacing: 1px;" onclick="startApp()">자리배치 시작하기</button>
+                    <button type="button" class="btn btn-sub" style="width: auto; padding: 16px 35px; font-size: 1.15rem; border-radius: 30px; border: 1.5px solid #10b981; color: #10b981; background: rgba(16, 185, 129, 0.1); font-weight: 700;" onclick="document.getElementById('backupInput').click()">이전 배치 불러오기</button>
                 </div>
                 
                 <div id="mainText" class="welcome-text" style="display: none;">
@@ -479,41 +442,41 @@
     </main>
 
     <aside class="sidebar-right">
-        <div class="config-divider" style="border: none; margin-top: 0; padding-top: 0;">
-            <div class="config-title" style="font-size: 1.1rem;">환경 설정 및 도움말</div>
+        <div class="config-divider">
+            <div class="config-title" style="font-size: 1.4rem;">환경 설정 및 도움말</div>
             
             <section class="config-section cfg-basic accordion-section closed">
                 <div class="accordion-header" onclick="toggleAccordion(this)">
-                    <h2 style="margin: 0; color: #e2e8f0; font-size: 0.95rem; font-weight: 600;">Basic Config <span style="font-size: 0.75rem; color: var(--text-dim); font-weight: normal; margin-left: 6px;">(기본 설정)</span></h2>
+                    <h2 style="margin: 0; color: #e2e8f0; font-size: 1.15rem; font-weight: 700;">기본 설정</h2>
                     <span class="accordion-icon" style="color: #e2e8f0;">▼</span>
                 </div>
                 
                 <div class="accordion-content" style="display: none; margin-top: 15px;">
-                    <div style="margin-bottom: 12px;">
-                        <div style="font-size: 0.85rem; font-weight: bold; margin-bottom: 6px; color: var(--text-dim);">학급 정보 입력</div>
-                        <input type="text" id="classInfoInput" class="custom-input" style="padding: 8px 12px; font-size: 0.9rem;" placeholder="예) 바이오의약과 1학년 1반" autocomplete="off">
+                    <div style="margin-bottom: 15px;">
+                        <div style="font-size: 0.9rem; font-weight: 800; margin-bottom: 6px; color: var(--text-dim);">학급 정보 입력</div>
+                        <input type="text" id="classInfoInput" class="custom-input" style="padding: 10px 14px; font-size: 0.95rem;" placeholder="출력용 제목 (예: 1학년 1반)" autocomplete="off">
                     </div>
 
                     <div>
-                        <div style="font-size: 0.85rem; font-weight: bold; margin-bottom: 6px; color: var(--text-dim);">좌석 레이아웃</div>
+                        <div style="font-size: 0.9rem; font-weight: 800; margin-bottom: 6px; color: var(--text-dim);">좌석 레이아웃</div>
                         <div class="layout-controls">
-                            <input type="number" id="colInput" class="custom-input" style="padding: 8px; font-size: 0.9rem;" min="2" max="10" placeholder="가로칸">
-                            <input type="number" id="rowInput" class="custom-input" style="padding: 8px; font-size: 0.9rem;" min="2" max="10" placeholder="세로칸">
+                            <input type="number" id="colInput" class="custom-input" style="padding: 10px; font-size: 0.95rem;" min="2" max="10" placeholder="가로칸">
+                            <input type="number" id="rowInput" class="custom-input" style="padding: 10px; font-size: 0.95rem;" min="2" max="10" placeholder="세로칸">
                         </div>
-                        <button type="button" class="btn btn-sub" style="width:100%; padding: 8px; margin-top: 5px; font-size: 0.85rem;" onclick="applyLayoutSettings()">적용 / 초기화</button>
+                        <button type="button" class="btn btn-sub" style="width:100%; padding: 12px; margin-top: 5px; font-size: 0.95rem;" onclick="applyLayoutSettings()">적용 / 초기화</button>
                     </div>
                 </div>
             </section>
 
             <section class="config-section cfg-data accordion-section closed">
                 <div class="accordion-header" onclick="toggleAccordion(this)">
-                    <h2 style="margin: 0; color: #e2e8f0; font-size: 0.95rem; font-weight: 600;">Data Config <span style="font-size: 0.75rem; color: var(--text-dim); font-weight: normal; margin-left: 6px;">(데이터 백업/복구)</span></h2>
+                    <h2 style="margin: 0; color: #e2e8f0; font-size: 1.15rem; font-weight: 700;">데이터 관리 및 백업</h2>
                     <span class="accordion-icon" style="color: #e2e8f0;">▼</span>
                 </div>
                 <div class="accordion-content" style="display: none; margin-top: 15px;">
                     <div class="btn-row">
-                        <button type="button" class="btn btn-sub" style="border: 1px solid #10b981; color: #10b981; font-size: 0.85rem; padding: 8px;" onclick="document.getElementById('backupInput').click()">불러오기</button>
-                        <button type="button" class="btn btn-sub" style="border: 1px solid #f59e0b; color: #f59e0b; font-size: 0.85rem; padding: 8px;" onclick="downloadBackupFile()">현재 저장</button>
+                        <button type="button" class="btn btn-sub" style="border: 1px solid #10b981; color: #10b981; font-size: 0.95rem; padding: 12px;" onclick="document.getElementById('backupInput').click()">불러오기</button>
+                        <button type="button" class="btn btn-sub" style="border: 1px solid #f59e0b; color: #f59e0b; font-size: 0.95rem; padding: 12px;" onclick="downloadBackupFile()">현재 저장</button>
                         <input type="file" id="backupInput" accept=".json" style="display:none">
                     </div>
                 </div>
@@ -521,16 +484,17 @@
 
             <section class="config-section cfg-tips accordion-section closed">
                 <div class="accordion-header" onclick="toggleAccordion(this)">
-                    <h2 style="margin: 0; color: #e2e8f0; font-size: 0.95rem; font-weight: 600;">Usage Tips <span style="font-size: 0.75rem; color: var(--text-dim); font-weight: normal; margin-left: 6px;">(도움말)</span></h2>
+                    <h2 style="margin: 0; color: #e2e8f0; font-size: 1.15rem; font-weight: 700;">사용 안내 및 팁</h2>
                     <span class="accordion-icon" style="color: #e2e8f0;">▼</span>
                 </div>
                 <div class="accordion-content usage-tips" style="display: none; margin-top: 12px; background: transparent; padding: 0; border: none;">
                     <ul>
-                        <li><span class="tip-title">[STEP 1 명단 준비]</span> 나이스 엑셀 명렬표(.xlsx) 또는 사진 폴더를 업로드하면 이름과 사진이 자동으로 분리되어 즉시 세팅됩니다.</li>
-                        <li><span class="tip-title">[STEP 2 통로 제어]</span> 자리가 생성되면 맨 윗줄의 <span style="color:#fff; font-weight:bold;">&lt;&gt;(띄우기), &gt;&lt;(붙이기)</span> 아이콘을 눌러 실제 교실에 맞게 통로를 자유롭게 구성하세요.</li>
-                        <li><span class="tip-title">[STEP 2 조건부 배치]</span> '짝꿍/기피 설정'을 켜고 대상을 차례로 클릭하세요. 선생님이 직접 띄워둔 통로를 완벽하게 인지하여 건너뛰지 않고 똑똑하게 배정됩니다.</li>
-                        <li><span class="tip-title">[STEP 2 수동 고정]</span> 학생 자리의 핀(📌)을 눌러 고정하거나 드래그로 위치를 바꿀 수 있습니다. 빈자리를 클릭하면 배정에서 완전히 제외(🚫)됩니다.</li>
-                        <li><span class="tip-title">[STEP 3 인쇄 및 백업]</span> '사진 숨기기' 체크 시 텍스트 전용 가로 인쇄 모드로 변환됩니다. 완성된 배치는 하단 '데이터 관리'에서 파일로 영구 백업할 수 있습니다.</li>
+                        <li><span class="tip-title" style="color:#10b981;">[STEP 1 명단 준비]</span> 나이스 엑셀 명렬표(.xlsx) 또는 사진 폴더를 업로드하면 자동으로 세팅됩니다.</li>
+                        <li><span class="tip-title" style="color:var(--primary);">[STEP 2 통로 제어]</span> 자리가 생성되면 맨 윗줄의 <span style="color:#fff; font-weight:bold;">&lt;&gt;, &gt;&lt;</span> 아이콘을 눌러 실제 교실에 맞게 통로를 구성하세요.</li>
+                        <li><span class="tip-title" style="color:var(--primary);">[STEP 2 조건 설정]</span> 앞줄, 짝꿍, 기피 설정 버튼을 켜고 대상을 클릭하세요. 지정된 통로를 인지하고 똑똑하게 배정됩니다.</li>
+                        <li><span class="tip-title" style="color:var(--near-color);">[STEP 2 인접 설정]</span> 특정 학생들을 앞뒤, 좌우, 대각선 등 1칸 반경 내에 무조건 가깝게 배치하고 싶을 때 사용하세요.</li>
+                        <li><span class="tip-title" style="color:var(--primary);">[STEP 2 수동 고정]</span> 학생 자리의 [고정] 버튼을 누르거나 드래그로 위치를 바꿀 수 있습니다. 빈자리를 클릭하면 배정에서 완전히 제외됩니다.</li>
+                        <li><span class="tip-title" style="color:#f43f5e;">[STEP 3 인쇄/백업]</span> 사진을 숨기면 텍스트 전용 모드가 됩니다. 완성된 배치는 하단 '데이터 관리'에서 파일로 영구 백업하세요.</li>
                     </ul>
                 </div>
             </section>
@@ -615,8 +579,8 @@
 
         document.getElementById('classInfoInput').addEventListener('input', e => {
             const classInfo = e.target.value.trim();
-            const titleEl = document.getElementById('mainTitle');
-            titleEl.innerHTML = classInfo ? `좌석 배치도 <span class="class-info-text">(${classInfo})</span>` : '좌석 배치도';
+            const subTitleEl = document.getElementById('subClassInfo');
+            subTitleEl.innerHTML = classInfo ? classInfo : '클래스그리드 좌석 배치도';
         });
 
         document.getElementById('messageInput').addEventListener('input', e => {
@@ -648,14 +612,20 @@
         let activeAisles = []; 
 
         let isPairMode = false;
+        let isNearMode = false; // 💡 인접 모드 활성화 상태 변수
         let isAvoidMode = false;
+        let isFrontMode = false; 
+        
         let selectedForPair = [];
+        let selectedForNear = [];
         let selectedForAvoid = [];
         
         let currentPairId = 1;
+        let currentNearId = 1;
         let currentAvoidId = 1;
         
         const pairColors = ['#fbbf24', '#a3e635', '#34d399', '#2dd4bf', '#60a5fa', '#818cf8', '#c084fc', '#f472b6', '#fb7185'];
+        const nearColors = ['#8b5cf6', '#a855f7', '#d946ef', '#ec4899', '#f43f5e', '#6366f1', '#3b82f6', '#0ea5e9'];
         const avoidColors = ['#ef4444', '#f97316', '#d946ef', '#8b5cf6', '#6366f1', '#14b8a6', '#10b981', '#84cc16', '#eab308'];
 
         const defaultAvatar = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjY2Ij48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjI2NiIgZmlsbD0iIzJkMzc0OCIvPjxjaXJjbGUgY3g9IjEwMCIgY3k9IjExMCIgcj0iNDUiIGZpbGw9IiM0YTU1NjgiLz48cGF0aCBkPSJNMzAgMjY2YzAtNDAgMzAtNzAgNzAtNzBoMGM0MCAwIDcwIDMwIDcwIDcwWiIgZmlsbD0iIzRhNTU2OCIvPjwvc3ZnPg==';
@@ -764,49 +734,83 @@
             }
         }
 
+        function toggleFrontMode() {
+            isFrontMode = !isFrontMode;
+            if (isFrontMode) {
+                isPairMode = false; isNearMode = false; isAvoidMode = false;
+                updatePairBtn(); updateNearBtn(); updateAvoidBtn();
+            }
+            updateFrontBtn();
+            renderGrid(false);
+            if(isFrontMode) showCustomToast("앞줄 설정 모드 ON: 무조건 앞자리에 앉아야 할 학생을 클릭하세요.");
+        }
+
         function togglePairMode() {
             isPairMode = !isPairMode;
             if (isPairMode) {
-                isAvoidMode = false; updateAvoidBtn();
+                isFrontMode = false; isNearMode = false; isAvoidMode = false;
+                updateFrontBtn(); updateNearBtn(); updateAvoidBtn();
             }
             updatePairBtn();
-            selectedForPair = []; selectedForAvoid = []; renderGrid(false);
-            if(isPairMode) showCustomToast("짝꿍 설정 모드 ON. 나란히 앉힐 두 학생을 차례로 클릭하세요.");
+            selectedForPair = []; selectedForNear = []; selectedForAvoid = []; renderGrid(false);
+            if(isPairMode) showCustomToast("짝꿍 설정 모드 ON: 나란히 앉힐 두 학생을 차례로 클릭하세요.");
+        }
+
+        function toggleNearMode() {
+            isNearMode = !isNearMode;
+            if (isNearMode) {
+                isFrontMode = false; isPairMode = false; isAvoidMode = false;
+                updateFrontBtn(); updatePairBtn(); updateAvoidBtn();
+            }
+            updateNearBtn();
+            selectedForPair = []; selectedForNear = []; selectedForAvoid = []; renderGrid(false);
+            if(isNearMode) showCustomToast("인접 설정 모드 ON: 가까운 주위 반경 내에 배치할 두 학생을 차례로 클릭하세요.");
         }
 
         function toggleAvoidMode() {
             isAvoidMode = !isAvoidMode;
             if (isAvoidMode) {
-                isPairMode = false; updatePairBtn();
+                isFrontMode = false; isPairMode = false; isNearMode = false;
+                updateFrontBtn(); updatePairBtn(); updateNearBtn();
             }
             updateAvoidBtn();
-            selectedForPair = []; selectedForAvoid = []; renderGrid(false);
-            if(isAvoidMode) showCustomToast("기피 설정 모드 ON. 멀리 떨어뜨릴 두 학생을 차례로 클릭하세요.");
+            selectedForPair = []; selectedForNear = []; selectedForAvoid = []; renderGrid(false);
+            if(isAvoidMode) showCustomToast("기피 설정 모드 ON: 멀리 떨어뜨릴 두 학생을 차례로 클릭하세요.");
+        }
+
+        function updateFrontBtn() {
+            const btn = document.getElementById('frontModeBtn');
+            if (isFrontMode) {
+                btn.innerText = '앞줄 (ON)'; btn.style.background = 'var(--front-color)'; btn.style.color = '#fff';
+            } else {
+                btn.innerText = '앞줄 (OFF)'; btn.style.background = 'transparent'; btn.style.color = 'var(--front-color)';
+            }
         }
 
         function updatePairBtn() {
             const btn = document.getElementById('pairModeBtn');
             if (isPairMode) {
-                btn.innerText = '짝꿍 설정 (ON)';
-                btn.style.background = 'var(--pair-color)';
-                btn.style.color = '#0f172a';
+                btn.innerText = '짝꿍 (ON)'; btn.style.background = 'var(--pair-color)'; btn.style.color = '#0f172a';
             } else {
-                btn.innerText = '짝꿍 설정 (OFF)';
-                btn.style.background = 'transparent';
-                btn.style.color = 'var(--pair-color)';
+                btn.innerText = '짝꿍 (OFF)'; btn.style.background = 'transparent'; btn.style.color = 'var(--pair-color)';
+            }
+        }
+
+        function updateNearBtn() {
+            const btn = document.getElementById('nearModeBtn');
+            if (isNearMode) {
+                btn.innerText = '인접 (ON)'; btn.style.background = 'var(--near-color)'; btn.style.color = '#fff';
+            } else {
+                btn.innerText = '인접 (OFF)'; btn.style.background = 'transparent'; btn.style.color = 'var(--near-color)';
             }
         }
 
         function updateAvoidBtn() {
             const btn = document.getElementById('avoidModeBtn');
             if (isAvoidMode) {
-                btn.innerText = '기피 설정 (ON)';
-                btn.style.background = 'var(--avoid-color)';
-                btn.style.color = '#fff';
+                btn.innerText = '기피 (ON)'; btn.style.background = 'var(--avoid-color)'; btn.style.color = '#fff';
             } else {
-                btn.innerText = '기피 설정 (OFF)';
-                btn.style.background = 'transparent';
-                btn.style.color = 'var(--avoid-color)';
+                btn.innerText = '기피 (OFF)'; btn.style.background = 'transparent'; btn.style.color = 'var(--avoid-color)';
             }
         }
 
@@ -867,7 +871,7 @@
                         name = match[2];
                     }
 
-                    students.push({ name: name, number: number, imgSrc: imgBlobUrl, isPinned: false, pairId: null, avoidGroups: [] });
+                    students.push({ name: name, number: number, imgSrc: imgBlobUrl, isPinned: false, isFront: false, pairId: null, nearGroups: [], avoidGroups: [] });
                 }
 
                 const opt = getOptimalGrid(students.length);
@@ -913,7 +917,7 @@
                     name = match[2];
                 }
                 
-                return { name: name, number: number, imgSrc: URL.createObjectURL(file), isPinned: false, pairId: null, avoidGroups: [] };
+                return { name: name, number: number, imgSrc: URL.createObjectURL(file), isPinned: false, isFront: false, pairId: null, nearGroups: [], avoidGroups: [] };
             });
             
             const opt = getOptimalGrid(students.length);
@@ -932,17 +936,17 @@
         });
 
         function syncStudentsArray() {
-            students = seats.filter(s => s.type === 'student').map(s => ({ name: s.name, number: s.number, imgSrc: s.imgSrc, isPinned: s.isPinned, pairId: s.pairId, avoidGroups: s.avoidGroups || [] }));
+            students = seats.filter(s => s.type === 'student').map(s => ({ name: s.name, number: s.number, imgSrc: s.imgSrc, isPinned: s.isPinned, isFront: s.isFront || false, pairId: s.pairId, nearGroups: s.nearGroups || [], avoidGroups: s.avoidGroups || [] }));
             
             const excelTextEl = document.getElementById('excelUploadText');
             const photoTextEl = document.getElementById('photoUploadText');
             
             if(students.length > 0) {
-                excelTextEl.innerHTML = `<span style="font-size: 1rem; margin-bottom: 4px;">나이스 명렬표 업로드</span><span style="font-size: 0.85em; color:var(--primary); font-weight:700;">(완료: ${students.length}명)</span>`;
-                photoTextEl.innerHTML = `<span style="font-size: 1rem;">학생 사진 업로드</span><span style="font-size: 0.85em; color:var(--primary); font-weight:700;">(완료: ${students.length}명)</span>`;
+                excelTextEl.innerHTML = `<span style="font-size: 1.05rem; margin-bottom: 4px; font-weight:800;">나이스 명렬표 업로드</span><span style="font-size: 0.85em; color:var(--primary); font-weight:700;">(완료: ${students.length}명)</span>`;
+                photoTextEl.innerHTML = `<span style="font-size: 1.05rem; font-weight:800;">학생 사진 업로드</span><span style="font-size: 0.85em; color:var(--primary); font-weight:700;">(완료: ${students.length}명)</span>`;
             } else {
-                excelTextEl.innerHTML = `<span style="font-size: 1rem; margin-bottom: 4px;">나이스 명렬표 업로드</span><span style="font-size: 0.8rem; font-weight: 500; color: #a7f3d0;">(.xlsx 파일 선택)</span>`;
-                photoTextEl.innerHTML = `<span style="font-size: 1rem;">학생 사진 업로드</span>`;
+                excelTextEl.innerHTML = `<span style="font-size: 1.05rem; margin-bottom: 4px; font-weight:800;">나이스 명렬표 업로드</span><span style="font-size: 0.8rem; font-weight: 500; color: #a7f3d0;">(.xlsx 파일 선택)</span>`;
+                photoTextEl.innerHTML = `<span style="font-size: 1.05rem; font-weight:800;">학생 사진 업로드</span>`;
             }
         }
 
@@ -964,11 +968,29 @@
             }
         }
 
+        window.cancelFront = function(e, idx) {
+            e.stopPropagation();
+            seats[idx].isFront = false;
+            syncStudentsArray(); renderGrid(false);
+            showCustomToast("앞줄 배정 설정이 삭제되었습니다.");
+        };
+
         window.cancelPair = function(e, pId) {
             e.stopPropagation();
             seats.forEach(s => { if(s && s.pairId === pId) s.pairId = null; });
             syncStudentsArray(); renderGrid(false);
             showCustomToast("짝꿍 연결이 삭제되었습니다.");
+        };
+
+        window.cancelNear = function(e, gId) {
+            e.stopPropagation();
+            seats.forEach(s => { 
+                if(s && s.nearGroups) {
+                    s.nearGroups = s.nearGroups.filter(id => id !== gId);
+                }
+            });
+            syncStudentsArray(); renderGrid(false);
+            showCustomToast("인접 설정이 삭제되었습니다.");
         };
 
         window.cancelAvoid = function(e, gId) {
@@ -1063,10 +1085,20 @@
                 div.style.gridColumn = (colIdx + aislesBefore + 1);
                 
                 div.onclick = (e) => {
-                    if (isPairMode || isAvoidMode) {
+                    if (isFrontMode) {
+                        if (seat.type !== 'student') { showCustomToast("빈 좌석은 설정할 수 없습니다."); return; }
+                        seat.isFront = !seat.isFront;
+                        syncStudentsArray();
+                        renderGrid(false);
+                        if(seat.isFront) showCustomToast("해당 학생이 앞줄 최우선 배치로 설정되었습니다.");
+                        else showCustomToast("앞줄 배정 설정이 해제되었습니다.");
+                        return;
+                    }
+
+                    if (isPairMode || isNearMode || isAvoidMode) {
                         if (seat.type !== 'student') { showCustomToast("빈 좌석은 설정할 수 없습니다."); return; }
                         
-                        let targetList = isPairMode ? selectedForPair : selectedForAvoid;
+                        let targetList = isPairMode ? selectedForPair : (isNearMode ? selectedForNear : selectedForAvoid);
                         let idxInList = targetList.indexOf(idx);
                         
                         if (idxInList > -1) { targetList.splice(idxInList, 1); } 
@@ -1075,52 +1107,48 @@
                         if (targetList.length === 2) {
                             let s1 = seats[targetList[0]], s2 = seats[targetList[1]];
                             
-                            let isAlreadyPair = s1.pairId && (s1.pairId === s2.pairId);
-                            let sharedAvoidGroups = [];
-                            if (s1.avoidGroups && s2.avoidGroups) {
-                                sharedAvoidGroups = s1.avoidGroups.filter(g => s2.avoidGroups.includes(g));
-                            }
+                            let cleanPairs = () => { if (s1.pairId === s2.pairId && s1.pairId !== null) { s1.pairId = null; s2.pairId = null; return true; } return false; };
+                            let cleanNears = () => {
+                                let shared = (s1.nearGroups && s2.nearGroups) ? s1.nearGroups.filter(g => s2.nearGroups.includes(g)) : [];
+                                if(shared.length > 0) {
+                                    shared.forEach(gId => seats.forEach(s => { if(s && s.nearGroups) s.nearGroups = s.nearGroups.filter(id => id !== gId); }));
+                                    return true;
+                                } return false;
+                            };
+                            let cleanAvoids = () => {
+                                let shared = (s1.avoidGroups && s2.avoidGroups) ? s1.avoidGroups.filter(g => s2.avoidGroups.includes(g)) : [];
+                                if(shared.length > 0) {
+                                    shared.forEach(gId => seats.forEach(s => { if(s && s.avoidGroups) s.avoidGroups = s.avoidGroups.filter(id => id !== gId); }));
+                                    return true;
+                                } return false;
+                            };
                             
                             if (isPairMode) {
-                                if (isAlreadyPair) {
-                                    s1.pairId = null; s2.pairId = null;
-                                    showCustomToast("짝꿍 관계가 해제되었습니다.");
-                                } else {
-                                    if (sharedAvoidGroups.length > 0) {
-                                        sharedAvoidGroups.forEach(gId => {
-                                            seats.forEach(s => { if (s && s.avoidGroups) s.avoidGroups = s.avoidGroups.filter(id => id !== gId); });
-                                        });
-                                        s1.pairId = currentPairId; s2.pairId = currentPairId++;
-                                        showCustomToast("기존 기피 설정이 취소되고 짝꿍으로 덮어씌워졌습니다!");
-                                    } else {
-                                        s1.pairId = currentPairId; s2.pairId = currentPairId++;
-                                        showCustomToast("짝꿍이 연결되었습니다!");
-                                    }
+                                if (cleanPairs()) { showCustomToast("짝꿍 관계가 해제되었습니다."); } 
+                                else {
+                                    cleanNears(); cleanAvoids();
+                                    s1.pairId = currentPairId; s2.pairId = currentPairId++;
+                                    showCustomToast("짝꿍이 연결되었습니다!");
                                 }
                                 selectedForPair = [];
+                            } else if (isNearMode) {
+                                if (cleanNears()) { showCustomToast("인접 관계가 해제되었습니다."); } 
+                                else {
+                                    cleanPairs(); cleanAvoids();
+                                    let gId = currentNearId++;
+                                    if (!s1.nearGroups) s1.nearGroups = []; if (!s2.nearGroups) s2.nearGroups = [];
+                                    s1.nearGroups.push(gId); s2.nearGroups.push(gId);
+                                    showCustomToast("인접 관계가 설정되었습니다!");
+                                }
+                                selectedForNear = [];
                             } else if (isAvoidMode) {
-                                if (sharedAvoidGroups.length > 0) {
-                                    sharedAvoidGroups.forEach(gId => {
-                                        seats.forEach(s => { if (s && s.avoidGroups) s.avoidGroups = s.avoidGroups.filter(id => id !== gId); });
-                                    });
-                                    showCustomToast("기피 관계가 해제되었습니다.");
-                                } else {
+                                if (cleanAvoids()) { showCustomToast("기피 관계가 해제되었습니다."); } 
+                                else {
+                                    cleanPairs(); cleanNears();
                                     let gId = currentAvoidId++;
-                                    if (!s1.avoidGroups) s1.avoidGroups = [];
-                                    if (!s2.avoidGroups) s2.avoidGroups = [];
-                                    
-                                    if (isAlreadyPair) {
-                                        let pIdToRemove = s1.pairId;
-                                        seats.forEach(s => { if (s && s.pairId === pIdToRemove) s.pairId = null; });
-                                        
-                                        s1.avoidGroups.push(gId);
-                                        s2.avoidGroups.push(gId);
-                                        showCustomToast("기존 짝꿍 설정이 취소되고 기피 관계로 덮어씌워졌습니다!");
-                                    } else {
-                                        s1.avoidGroups.push(gId);
-                                        s2.avoidGroups.push(gId);
-                                        showCustomToast("기피 관계가 설정되었습니다!");
-                                    }
+                                    if (!s1.avoidGroups) s1.avoidGroups = []; if (!s2.avoidGroups) s2.avoidGroups = [];
+                                    s1.avoidGroups.push(gId); s2.avoidGroups.push(gId);
+                                    showCustomToast("기피 관계가 설정되었습니다!");
                                 }
                                 selectedForAvoid = [];
                             }
@@ -1129,12 +1157,14 @@
                     }
                 };
 
-                div.ondblclick = (e) => { if (!isPairMode && !isAvoidMode) makeEditable(e, idx); };
+                div.ondblclick = (e) => { if (!isPairMode && !isNearMode && !isAvoidMode && !isFrontMode) makeEditable(e, idx); };
 
                 let contentHtml = '';
                 if (seat.type === 'student') {
                     if (seat.isPinned) div.classList.add('is-pinned');
+                    if (seat.isFront) div.classList.add('is-fronting'); 
                     if (isPairMode && selectedForPair.includes(idx)) div.classList.add('is-pairing');
+                    if (isNearMode && selectedForNear.includes(idx)) div.classList.add('is-nearing');
                     if (isAvoidMode && selectedForAvoid.includes(idx)) div.classList.add('is-avoiding');
                     
                     let nameHtml = '';
@@ -1145,28 +1175,40 @@
                     }
 
                     let badgesHtml = '<div class="badge-container">';
+                    if (seat.isFront) {
+                        badgesHtml += `<div class="front-label" style="background-color: var(--front-color); color: white;" onclick="cancelFront(event, ${idx})">앞줄</div>`;
+                    }
                     if (seat.pairId) {
                         let color = pairColors[seat.pairId % pairColors.length];
-                        badgesHtml += `<div class="pair-label" style="background-color: ${color};" onclick="cancelPair(event, ${seat.pairId})">🔗 짝꿍</div>`;
+                        badgesHtml += `<div class="pair-label" style="background-color: ${color}; color: #0f172a;" onclick="cancelPair(event, ${seat.pairId})">짝꿍</div>`;
+                    }
+                    if (seat.nearGroups && seat.nearGroups.length > 0) {
+                        seat.nearGroups.forEach(gId => {
+                            let color = nearColors[gId % nearColors.length];
+                            badgesHtml += `<div class="near-label" style="background-color: ${color}; color: white;" onclick="cancelNear(event, ${gId})">인접</div>`;
+                        });
                     }
                     if (seat.avoidGroups && seat.avoidGroups.length > 0) {
                         seat.avoidGroups.forEach(gId => {
                             let color = avoidColors[gId % avoidColors.length];
-                            badgesHtml += `<div class="avoid-label" style="background-color: ${color};" onclick="cancelAvoid(event, ${gId})">⛔ 기피</div>`;
+                            badgesHtml += `<div class="avoid-label" style="background-color: ${color}; color: white;" onclick="cancelAvoid(event, ${gId})">기피</div>`;
                         });
                     }
                     badgesHtml += '</div>';
 
-                    contentHtml = `<div class="pin-btn-container" onclick="togglePin(event, ${idx})"><span class="pin-icon">${seat.isPinned ? '📌' : '📍'}</span></div>
+                    // 💡 압정 이모지 사용 및 배경 블러 처리로 고급스럽게 복원
+                    let pinBtnClass = seat.isPinned ? "pin-btn-container pinned-active" : "pin-btn-container";
+                    let pinIcon = seat.isPinned ? "📌" : "📍";
+                    contentHtml = `<div class="${pinBtnClass}" onclick="togglePin(event, ${idx})"><span class="pin-icon">${pinIcon}</span></div>
                                    ${badgesHtml}
                                    <img class="student-img" src="${seat.imgSrc}"><div class="student-name">${nameHtml}</div>`;
                 } else {
                     if (seat.isExcluded) {
                         div.classList.add('empty-seat', 'excluded-seat');
-                        contentHtml = `<span class="empty-seat-text"><span style="font-size:1.5rem; color:#f43f5e;">🚫</span><br><span style="color:#fda4af; font-weight:bold;">배정 제외됨</span><br><span class="btn-include" onclick="toggleExclude(event, ${idx})">➕ 배정에 포함</span></span>`;
+                        contentHtml = `<span class="empty-seat-text"><span style="font-size:1.5rem; color:#f43f5e; font-weight:bold;">X</span><br><span style="color:#fda4af; font-weight:bold;">제외됨</span><br><span class="btn-include" onclick="toggleExclude(event, ${idx})">배정 포함</span></span>`;
                     } else {
                         div.classList.add('empty-seat');
-                        contentHtml = `<span class="empty-seat-text"><span style="font-size:1.5rem">+</span><br>더블클릭 입력<br><span class="btn-exclude" onclick="toggleExclude(event, ${idx})">🚫 빈자리 두기</span></span>`;
+                        contentHtml = `<span class="empty-seat-text"><span style="font-size:1.5rem">+</span><br>더블클릭 입력<br><span class="btn-exclude" onclick="toggleExclude(event, ${idx})">빈자리 설정</span></span>`;
                     }
                 }
                 
@@ -1238,7 +1280,7 @@
                     }
                     
                     let imgSrc = seats[idx].imgSrc || defaultAvatar; 
-                    seats[idx] = { type: 'student', name: name, number: number, imgSrc: imgSrc, isPinned: seats[idx].isPinned || false, pairId: seats[idx].pairId || null, avoidGroups: seats[idx].avoidGroups || [] };
+                    seats[idx] = { type: 'student', name: name, number: number, imgSrc: imgSrc, isPinned: seats[idx].isPinned || false, isFront: seats[idx].isFront || false, pairId: seats[idx].pairId || null, nearGroups: seats[idx].nearGroups || [], avoidGroups: seats[idx].avoidGroups || [] };
                 }
                 syncStudentsArray();
                 renderGrid(false);
@@ -1254,15 +1296,18 @@
             seats.forEach(s => {
                 if(s.type === 'student') {
                     s.isPinned = false;
+                    s.isFront = false;
                     s.pairId = null;
+                    s.nearGroups = [];
                     s.avoidGroups = [];
                 }
             }); 
             selectedForPair = [];
+            selectedForNear = [];
             selectedForAvoid = [];
             syncStudentsArray();
             renderGrid(false); 
-            showCustomToast("모든 설정(고정, 짝꿍, 기피)이 해제되었습니다.");
+            showCustomToast("모든 설정이 해제되었습니다.");
         }
         
         function saveSecretPlan() {
@@ -1273,7 +1318,7 @@
                 return "X";
             });
             localStorage.setItem('secretSeatingPlan', JSON.stringify(secretPlanNames));
-            showCustomToast("스마트 좌석 배치 시스템 v18.1 (사용자 팁 업데이트!)\n선생님, 정말 고생 많으셨습니다! ✨");
+            showCustomToast("ClassGrid v19.0 (인접 기능 및 브랜딩 업데이트!)\n선생님, 정말 고생 많으셨습니다! ✨");
         }
 
         function triggerAnimation(element) {
@@ -1447,7 +1492,7 @@
             }
 
             renderGrid(true);
-            if (bestScore > 0) showCustomToast("복잡한 조건(기피)으로 인해 일부 완벽히 맞추지 못했을 수 있습니다. 재배치를 돌려보세요.");
+            if (bestScore > 0) showCustomToast("복잡한 조건으로 인해 일부 완벽히 맞추지 못했을 수 있습니다. 재배치를 돌려보세요.");
         }
 
         function calcScore(tempSeats) {
@@ -1456,12 +1501,33 @@
             
             tempSeats.forEach((s, i) => {
                 if (s && s.type === 'student') {
+                    if (s.isFront) {
+                        let r = Math.floor(i / currentCols);
+                        if (r > 0) penalty += 5000 * r; 
+                    }
+
                     if (s.pairId) {
                         if (!pairMap[s.pairId]) pairMap[s.pairId] = [];
                         pairMap[s.pairId].push(i);
                     }
+                    
+                    let r1 = Math.floor(i / currentCols), c1 = i % currentCols;
+                    
+                    if (s.nearGroups && s.nearGroups.length > 0) {
+                        tempSeats.forEach((s2, j) => {
+                            if (i !== j && s2 && s2.type === 'student' && s2.nearGroups) {
+                                let hasSharedNear = s.nearGroups.some(g => s2.nearGroups.includes(g));
+                                if (hasSharedNear) {
+                                    let r2 = Math.floor(j / currentCols), c2 = j % currentCols;
+                                    if (Math.abs(r1 - r2) > 1 || Math.abs(c1 - c2) > 1) {
+                                        penalty += 80; 
+                                    }
+                                }
+                            }
+                        });
+                    }
+
                     if (s.avoidGroups && s.avoidGroups.length > 0) {
-                        let r1 = Math.floor(i / currentCols), c1 = i % currentCols;
                         tempSeats.forEach((s2, j) => {
                             if (i !== j && s2 && s2.type === 'student' && s2.avoidGroups) {
                                 let hasSharedAvoid = s.avoidGroups.some(g => s2.avoidGroups.includes(g));
@@ -1508,7 +1574,7 @@
             const fileName = classInfo ? `${classInfo}_좌석백업.json` : "좌석배치백업.json";
             
             const planData = seats.map(s => {
-                if (s.type === 'student') return { id: getUid(s), pairId: s.pairId || null, avoidGroups: s.avoidGroups || [] };
+                if (s.type === 'student') return { id: getUid(s), isFront: s.isFront || false, pairId: s.pairId || null, nearGroups: s.nearGroups || [], avoidGroups: s.avoidGroups || [] };
                 if (s.type === 'empty' && s.isExcluded) return "EXCLUDED";
                 return "X";
             });
@@ -1546,15 +1612,17 @@
                         
                         let nameRaw = typeof item === 'string' ? item : item.id;
                         let pId = typeof item === 'object' ? item.pairId : null;
+                        let nGroups = typeof item === 'object' ? (item.nearGroups || []) : [];
                         let aGroups = typeof item === 'object' ? (item.avoidGroups || []) : [];
+                        let iFront = typeof item === 'object' ? (item.isFront || false) : false;
                         
                         let number = '', name = nameRaw;
                         const match = nameRaw.match(/^(\d+)[_.\-\s]*(.+)$/);
                         if (match) { number = match[1]; name = match[2]; }
 
                         const foundStudent = students.find(st => st.name === name && st.number === number) || students.find(st => st.name === nameRaw);
-                        return foundStudent ? { type: 'student', ...foundStudent, isPinned: false, pairId: pId, avoidGroups: aGroups } 
-                                            : { type: 'student', name: name, number: number, imgSrc: defaultAvatar, isPinned: false, pairId: pId, avoidGroups: aGroups };
+                        return foundStudent ? { type: 'student', ...foundStudent, isPinned: false, isFront: iFront, pairId: pId, nearGroups: nGroups, avoidGroups: aGroups } 
+                                            : { type: 'student', name: name, number: number, imgSrc: defaultAvatar, isPinned: false, isFront: iFront, pairId: pId, nearGroups: nGroups, avoidGroups: aGroups };
                     });
                     
                     syncStudentsArray(); 
@@ -1571,10 +1639,10 @@
             const btn = document.getElementById('fitScreenBtn');
             if (isFitScreen) {
                 body.classList.add('fit-screen');
-                btn.innerHTML = '일반화면 복귀'; btn.style.background = 'var(--primary)'; btn.style.color = '#0f172a';
+                btn.innerHTML = '일반화면 복귀'; btn.style.background = 'rgba(0,0,0,0.2)'; btn.style.color = '#fff';
             } else {
                 body.classList.remove('fit-screen');
-                btn.innerHTML = '꽉찬화면 실행'; btn.style.background = 'transparent'; btn.style.color = 'var(--primary)';
+                btn.innerHTML = '전체화면'; btn.style.background = 'rgba(0,0,0,0.25)'; btn.style.color = '#fff';
             }
         }
 
