@@ -49,12 +49,6 @@
         .sidebar-left { width: var(--sidebar-left-width); border-right: 1px solid rgba(255,255,255,0.05); box-shadow: 5px 0 20px rgba(0,0,0,0.3); }
         .sidebar-right { width: var(--sidebar-right-width); border-left: 1px solid rgba(255,255,255,0.05); box-shadow: -5px 0 20px rgba(0,0,0,0.3); display: flex; flex-direction: column; }
         
-        body.intro-mode .sidebar-left { margin-left: calc(-1 * var(--sidebar-left-width)); transform: translateX(-100%); opacity: 0; pointer-events: none; }
-        body.intro-mode .sidebar-right { margin-right: calc(-1 * var(--sidebar-right-width)); transform: translateX(100%); opacity: 0; pointer-events: none; }
-        
-        .welcome-character { max-width: 450px; height: auto; border-radius: 20px; filter: drop-shadow(0 0 40px rgba(34, 211, 238, 0.15)) drop-shadow(0 15px 25px rgba(0,0,0,0.5)); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.4s ease; }
-        body.intro-mode .welcome-character:hover { transform: scale(1.03); filter: drop-shadow(0 0 50px rgba(34, 211, 238, 0.6)) drop-shadow(0 25px 35px rgba(0,0,0,0.6)); }
-        
         .custom-input { width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 14px 16px; color: var(--text-main); font-family: inherit; font-size: 1rem; transition: all 0.3s; margin-bottom: 5px; }
         .custom-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.15); }
 
@@ -159,12 +153,8 @@
         #subClassInfo { font-size: 1.15rem; color: var(--text-dim); font-weight: 600; letter-spacing: 1px; }
 
         .podium { width: 350px; padding: 16px; border: 2px solid var(--primary); color: var(--primary); border-radius: 12px; text-align: center; font-weight: 800; font-size: 1.4rem; margin: 0 auto 35px auto; letter-spacing: 8px; background: rgba(34, 211, 238, 0.05); flex-shrink: 0; box-shadow: 0 4px 15px rgba(34, 211, 238, 0.1); }
-
-        #emptyState { display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; width: 100%; margin-bottom: 30px; position: relative; z-index: 50; }
-        .welcome-text { margin-top: 30px; font-size: 1.25rem; color: var(--text-dim); text-align: center; line-height: 1.6; letter-spacing: 1px; font-weight: 600; }
-        .welcome-text span { color: var(--primary); font-weight: 800; }
         
-        /* 🚨 min-height: 0 속성 추가: Grid 영역 강제 팽창 방지 */
+        /* 🚨 min-height: 0 속성 유지: Grid 영역 강제 팽창 방지 */
         #seatGridWrapper { position: relative; width: 100%; flex-grow: 1; display: flex; flex-direction: column; min-height: 0; }
         .seating-grid { display: grid; grid-template-columns: var(--grid-template, repeat(var(--grid-cols), 1fr)); grid-template-rows: repeat(var(--grid-rows), minmax(0, 1fr)); gap: var(--gap-size); width: 100%; flex-grow: 1; align-content: stretch; position: relative; z-index: 1; min-height: 0; }
         .seat-box { position: relative; background: var(--card-bg); border-radius: 14px; display: flex; flex-direction: row-reverse; align-items: center; justify-content: space-between; padding: 0; box-shadow: 0 6px 12px rgba(0,0,0,0.2); cursor: grab; transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s, filter 0.5s; overflow: visible; border: 3px solid transparent; min-height: 0; }
@@ -212,7 +202,6 @@
         
         .seating-grid.hide-photos .student-img { display: none !important; }
         .seating-grid.hide-photos .seat-box-content { flex-direction: column; justify-content: center; align-items: center; padding: 15px; }
-        /* 🚨 min() 함수를 추가하여 높이에 비례하게 폰트가 팽창하는 것 방지 */
         .seating-grid.hide-photos .student-name { width: 100% !important; height: 100% !important; font-size: min(var(--name-font), 6vh) !important; color: var(--primary); justify-content: center !important; gap: 4px !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
         .seating-grid.hide-photos .seat-number { font-size: 0.6em !important; color: var(--text-dim) !important; margin: 0 !important; opacity: 1 !important; line-height: 1 !important; }
         .seating-grid.hide-photos .seat-name { font-size: 1.1em !important; margin: 0 !important; line-height: 1 !important; }
@@ -262,7 +251,7 @@
         /* 🖨️ [인쇄용 CSS] 브랜딩 완벽 연동 */
         @media print {
             html, body { width: 100% !important; height: 100% !important; margin: 0 !important; padding: 0 !important; background: white !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; overflow: hidden !important; }
-            .sidebar-left, .sidebar-right, #modal, .pin-btn-container, #emptyState, .credit-btn, #customToast, #countdownOverlay, .btn-exclude, .btn-include, #gridColumnToggles { display: none !important; }
+            .sidebar-left, .sidebar-right, #modal, .pin-btn-container, .credit-btn, #customToast, #countdownOverlay, .btn-exclude, .btn-include, #gridColumnToggles { display: none !important; }
             .main-content { padding: 0 !important; display: flex !important; width: 100% !important; height: 100% !important; overflow: hidden !important; }
             #captureArea { width: 100% !important; height: 100% !important; max-width: none !important; padding: 4mm !important; background: white !important; box-sizing: border-box !important; display: flex !important; flex-direction: column !important; }
             .header-group { flex-shrink: 0 !important; margin-bottom: 1mm !important; }
@@ -301,7 +290,7 @@
     </style>
     <style id="dynamicPrintStyle"> @media print { @page { size: A4 portrait; margin: 5mm; } } </style>
 </head>
-<body id="bodyTag" class="intro-mode">
+<body id="bodyTag">
 
     <aside class="sidebar-left">
         <div class="workflow-header">
@@ -419,17 +408,6 @@
                 <div id="subClassInfo">클래스그리드 좌석 배치도</div>
             </div>
             <div id="dynamicPodium" class="podium">교 탁</div>
-            
-            <div id="emptyState">
-                <div style="position: relative; z-index: 50; display: flex; flex-direction: column; align-items: center;">
-                    <img src="캐릭터기본형.png" alt="캐릭터" class="welcome-character">
-                    
-                    <div id="welcomeActionGroup" style="display: flex; gap: 15px; margin-top: 35px; flex-wrap: wrap; justify-content: center;">
-                        <button type="button" class="btn btn-shuffle" style="width: auto; padding: 16px 35px; font-size: 1.2rem; border-radius: 30px; letter-spacing: 1px;" onclick="startApp()">자리배치 시작하기</button>
-                        <button type="button" class="btn btn-sub" style="width: auto; padding: 16px 35px; font-size: 1.15rem; border-radius: 30px; border: 1.5px solid #10b981; color: #10b981; background: rgba(16, 185, 129, 0.1); font-weight: 700;" onclick="document.getElementById('backupInput').click()">이전 배치 불러오기</button>
-                    </div>
-                </div>
-            </div>
             
             <div id="seatGridWrapper">
                 <div id="gridColumnToggles"></div>
@@ -566,24 +544,6 @@
             }
         }
 
-        function startApp() {
-            if (!document.body.classList.contains('intro-mode')) return;
-            document.body.classList.remove('intro-mode');
-            
-            // 💡 클릭 즉시 빈 좌석표를 렌더링하여 화면이 전환됨을 확실히 보여줌
-            if (seats.length === 0) {
-                applyLayoutSettings();
-            }
-            
-            const step1Section = document.querySelector('.step1');
-            if (step1Section && step1Section.classList.contains('closed')) {
-                toggleAccordion(step1Section.querySelector('.accordion-header'));
-            }
-
-            // 🚨 앱 시작 시 우측 "기본 설정" 아코디언 자동으로 열기
-            openAccordionSection('.cfg-basic');
-        }
-
         document.getElementById('classInfoInput').addEventListener('input', e => {
             const classInfo = e.target.value.trim();
             const subTitleEl = document.getElementById('subClassInfo');
@@ -668,7 +628,6 @@
             root.style.setProperty('--grid-rows', currentRows);
             const total = currentCols * currentRows;
             
-            /* 🚨 폰트 사이즈가 부모 요소를 찢고 나오지 않도록 약간 줄임 */
             if (total > 36) {
                 root.style.setProperty('--gap-size', '8px');
                 root.style.setProperty('--name-font', isHide ? '1.5rem' : '0.85rem');
@@ -704,9 +663,6 @@
             let newRows = isNaN(rowVal) ? 4 : rowVal;
 
             if (students.length === 0) {
-                if (document.body.classList.contains('intro-mode')) startApp();
-                document.getElementById('emptyState').style.display = 'none';
-                
                 currentCols = newCols;
                 currentRows = newRows;
                 document.getElementById('colInput').value = currentCols;
@@ -720,7 +676,6 @@
                 syncStudentsArray();
                 renderColumnToggles();
                 renderGrid(true);
-                showCustomToast("빈 좌석표가 생성되었습니다. 자리를 더블클릭하여 이름을 입력하거나 명단을 준비해주세요.");
             } else {
                 if (isNaN(colVal) || isNaN(rowVal)) {
                     const opt = getOptimalGrid(students.length);
@@ -827,8 +782,6 @@
             const file = e.target.files[0];
             if (!file) return;
 
-            if (document.body.classList.contains('intro-mode')) startApp();
-            document.getElementById('emptyState').style.display = 'none';
             showCustomToast("엑셀 파일을 분석 중입니다... 잠시만 기다려주세요.");
 
             try {
@@ -909,10 +862,8 @@
         });
 
         document.getElementById('photoInput').addEventListener('change', e => {
-            if (document.body.classList.contains('intro-mode')) startApp();
             const files = Array.from(e.target.files);
             if (files.length === 0) return;
-            document.getElementById('emptyState').style.display = 'none';
             
             students = files.map(file => {
                 const lastDotIndex = file.name.lastIndexOf('.');
@@ -1610,7 +1561,6 @@
         }
 
         document.getElementById('backupInput').addEventListener('change', function(e) {
-            if (document.body.classList.contains('intro-mode')) startApp(); 
             const file = e.target.files[0];
             if (!file) return;
             
@@ -1623,7 +1573,7 @@
                     
                     activeAisles = savedData.a || new Array(Math.max(0, currentCols - 1)).fill(false);
                     
-                    applyGridStyle(); document.getElementById('emptyState').style.display = 'none';
+                    applyGridStyle();
 
                     seats = savedData.p.map(item => {
                         if (item === "X") return { type: 'empty', isExcluded: false };
@@ -1711,9 +1661,16 @@
                 });
                 const podium = document.getElementById('dynamicPodium');
                 podium.style.setProperty('margin', '0 auto 30px auto', 'important');
-                document.getElementById('captureArea').insertBefore(podium, document.getElementById('emptyState'));
+                document.getElementById('captureArea').insertBefore(podium, document.getElementById('seatGridWrapper'));
             }
         }
+
+        // 🚨 페이지 로드 시 빈 격자(4x4)를 자동으로 만들고 시작 메뉴를 열어주는 로직
+        window.addEventListener('DOMContentLoaded', () => {
+            applyLayoutSettings();
+            openAccordionSection('.step1');
+            openAccordionSection('.cfg-basic');
+        });
     </script>
 </body>
 </html>
